@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温度和湿度监测图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+</head>
+<body>
+    <div style="max-width: 800px; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let dataPoints = /*[[${tempAndHumiDataJson}]]*/ '[]';
+
+        // 确保JSON数据未转义
+        dataPoints = /*[[${tempAndHumiDataJson}]]*/ [];
+        dataPoints = JSON.parse(dataPoints);
+
+        console.log(dataPoints);
+
+        const temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+        const humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: temperatureData.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                    borderColor: 'red',
+                    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                    yAxisID: 'y-axis-1'
+                }, {
+                    label: 'Humidity (%)',
+                    data: humidityData.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.5)',
+                    yAxisID: 'y-axis-2'
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            parser: 'YYYY-MM-DDTHH:mm:ss.SSSSSS',
+                            unit: 'minute',
+                            displayFormats: {
+                                minute: 'HH:mm:ss'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                            threshold: 10,
+                        }
+                    },
+                    'y-axis-1': {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Temperature (°C)'
+                        }
+                    },
+                    'y-axis-2': {
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Humidity (%)'
+                        }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                            rangeMin: {
+                                x: null
+                            },
+                            rangeMax: {
+                                x: null
+                            }
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                                speed: 0.1
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'x'
+                        }
+                    }
+                }
+            }
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

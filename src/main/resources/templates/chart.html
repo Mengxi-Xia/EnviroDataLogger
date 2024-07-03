@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>温度和湿度监测图表</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
@@ -11,34 +13,46 @@
 </head>
 <body>
     <div style="max-width: 800px; margin: auto;">
+        <button onclick="resetChart()">Reset重置</button>
+        <label>Start Time开始时间:</label>
+        <input id="startTime" type="text">
+        <label>End Time结束时间:</label>
+        <input id="endTime" type="text">
+        <div id="dateRange"></div>
         <canvas id="myChart"></canvas>
     </div>
     <script th:inline="javascript">
         /*<![CDATA[*/
         let dataPoints = /*[[${tempAndHumiDataJson}]]*/ '[]';
-
-        // 确保JSON数据未转义
         dataPoints = /*[[${tempAndHumiDataJson}]]*/ [];
         dataPoints = JSON.parse(dataPoints);
 
         console.log(dataPoints);
 
-        const temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
-        const humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+        let temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+        let humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+        let minDate = new Date(Math.min(...dataPoints.map(dp => new Date(dp.timestamp))));
+        let maxDate = new Date(Math.max(...dataPoints.map(dp => new Date(dp.timestamp))));
+        let selectedStartTime = null;
+        let selectedEndTime = null;
+        const initialMin = moment().subtract(30, 'minutes').toDate();
+        const initialMax = new Date();
+
+        document.getElementById('dateRange').innerText = `数据集最早日期：${minDate.toLocaleString()}，最晚：${maxDate.toLocaleString()}`;
 
         const ctx = document.getElementById('myChart').getContext('2d');
-        const myChart = new Chart(ctx, {
+        let myChart = new Chart(ctx, {
             type: 'line',
             data: {
                 datasets: [{
-                    label: 'Temperature (°C)',
-                    data: temperatureData.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                    label: 'Temperature温度 (°C)',
+                    data: temperatureData,
                     borderColor: 'red',
                     backgroundColor: 'rgba(255, 0, 0, 0.5)',
                     yAxisID: 'y-axis-1'
                 }, {
-                    label: 'Humidity (%)',
-                    data: humidityData.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                    label: 'Humidity湿度 (%)',
+                    data: humidityData,
                     borderColor: 'blue',
                     backgroundColor: 'rgba(0, 0, 255, 0.5)',
                     yAxisID: 'y-axis-2'
@@ -52,17 +66,14 @@
                             parser: 'YYYY-MM-DDTHH:mm:ss.SSSSSS',
                             unit: 'minute',
                             displayFormats: {
-                                minute: 'HH:mm:ss'
+                                minute: 'YYYY-MM-DD HH:mm:ss'
                             }
                         },
+                        min: initialMin,
+                        max: initialMax,
                         title: {
                             display: true,
-                            text: 'Time'
-                        },
-                        pan: {
-                            enabled: true,
-                            mode: 'x',
-                            threshold: 10,
+                            text: 'Time时间'
                         }
                     },
                     'y-axis-1': {
@@ -70,7 +81,10 @@
                         position: 'left',
                         title: {
                             display: true,
-                            text: 'Temperature (°C)'
+                            text: 'Temperature温度 (°C)'
+                        },
+                        ticks: {
+                            stepSize: 2.0
                         }
                     },
                     'y-axis-2': {
@@ -81,36 +95,121 @@
                         },
                         title: {
                             display: true,
-                            text: 'Humidity (%)'
-                        }
-                    }
-                },
-                plugins: {
-                    zoom: {
-                        pan: {
-                            enabled: true,
-                            mode: 'x',
-                            rangeMin: {
-                                x: null
-                            },
-                            rangeMax: {
-                                x: null
-                            }
+                            text: 'Humidity湿度 (%)'
                         },
-                        zoom: {
-                            wheel: {
-                                enabled: true,
-                                speed: 0.1
-                            },
-                            pinch: {
-                                enabled: true
-                            },
-                            mode: 'x'
+                        ticks: {
+                            stepSize: 2.0
                         }
                     }
                 }
             }
         });
+
+        function initializeStartTimePicker(minDate, maxDate) {
+            flatpickr("#startTime", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                minDate: minDate,
+                maxDate: maxDate,
+                onClose: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        selectedStartTime = selectedDates[0];
+                        checkAndUpdateData();
+                    }
+                }
+            });
+        }
+
+        function initializeEndTimePicker(minDate, maxDate) {
+            flatpickr("#endTime", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                minDate: minDate,
+                maxDate: maxDate,
+                onClose: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        selectedEndTime = selectedDates[0];
+                        checkAndUpdateData();
+                    }
+                }
+            });
+        }
+
+        function checkAndUpdateData() {
+            if (selectedStartTime && selectedEndTime) {
+                if (selectedEndTime <= selectedStartTime) {
+                    alert("结束时间必须晚于开始时间。");
+                    return;
+                }
+                temperatureData = dataPoints.filter(dp => new Date(dp.timestamp) >= selectedStartTime && new Date(dp.timestamp) <= selectedEndTime)
+                    .map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                humidityData = dataPoints.filter(dp => new Date(dp.timestamp) >= selectedStartTime && new Date(dp.timestamp) <= selectedEndTime)
+                    .map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+                myChart.options.scales.x.min = selectedStartTime;
+                myChart.options.scales.x.max = selectedEndTime;
+                updateChart();
+                stopAutoRefresh();
+            }
+        }
+
+        initializeStartTimePicker(minDate,maxDate);
+        initializeEndTimePicker(minDate,maxDate);
+
+        function updateChart() {
+            myChart.data.datasets[0].data = temperatureData;
+            myChart.data.datasets[1].data = humidityData;
+            myChart.update();
+        }
+
+        function fetchAndUpdateChart() {
+            if (!autoRefresh) return;
+
+            fetch('http://homemoni.xyz/api/tempAndHumi')
+                .then(response => response.json())
+                .then(newData => {
+                    const newTemperatureData = newData.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                    const newHumidityData = newData.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+                    myChart.data.datasets[0].data = newTemperatureData;
+                    myChart.data.datasets[1].data = newHumidityData;
+                    myChart.options.scales.x.min = moment().subtract(30, 'minutes').toDate();;
+                    myChart.options.scales.x.max = new Date();
+                    myChart.update();
+
+                    // Update min and max dates with new data
+                    minDate = new Date(Math.min(minDate, ...newData.map(dp => new Date(dp.timestamp))));
+                    maxDate = new Date(Math.max(maxDate, ...newData.map(dp => new Date(dp.timestamp))));
+                    updateDateRangeText(minDate, maxDate);
+
+                    const endTimeInput = document.querySelector("#endTime");
+                    endTimeInput._flatpickr.destroy(); // 销毁现有的 Flatpickr 实例
+                    initializeEndTimePicker(minDate, maxDate);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        let autoRefresh = true;
+
+        function stopAutoRefresh() {
+            autoRefresh = false;
+        }
+
+        function resetChart() {
+            autoRefresh = true;
+            fetchAndUpdateChart();
+            temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+            humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+            myChart.options.scales.x.min = moment().subtract(30, 'minutes').toDate();;
+            myChart.options.scales.x.max = new Date();
+            updateChart();
+        }
+
+        function updateDateRangeText(min, max) {
+            document.getElementById('dateRange').innerText = `数据集最早日期：${min.toLocaleString()}，最晚：${max.toLocaleString()}`;
+        }
+
+        setInterval(fetchAndUpdateChart, 30000);
         /*]]>*/
     </script>
 </body>

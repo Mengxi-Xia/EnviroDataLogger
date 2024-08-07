@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温度和湿度监测图表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 100px;
+            height: 100px;
+        }
+
+        #loading img {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Fullscreen overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Progress bar */
+        #progressContainer {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 80%;
+            max-width: 500px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #progressBar {
+            width: 100%;
+            background: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+
+        }
+
+        #progressBar div {
+            height: 100%;
+            width: 0;
+            background: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: rgb(0, 0, 0);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay"></div>
+    <div id="progressContainer">
+        <div id="progressBar">
+            <div>0%</div>
+        </div>
+    </div>
+    <div style="max-width: 800px; margin: auto;">
+        <button onclick="resetChart()">Reset重置</button>
+        <label>Start Time开始时间:</label>
+        <input id="startTime" type="text">
+        <label>End Time结束时间:</label>
+        <input id="endTime" type="text">
+        <div id="dateRange"></div>
+        <canvas id="tempAndHumiChart"></canvas>
+    </div>
+    <script>
+        let dataPoints = [];
+        let temperatureData = [];
+        let humidityData = [];
+        let selectedStartTime = null;
+        let selectedEndTime = null;
+        let autoRefresh = true;
+        
+        const ctx = document.getElementById('tempAndHumiChart').getContext('2d');
+        let tempAndHumiChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [{
+                    label: 'Temperature温度 (°C)',
+                    borderColor: 'red',
+                    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                    yAxisID: 'y-axis-1'
+                }, {
+                    label: 'Humidity湿度 (%)',
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.5)',
+                    yAxisID: 'y-axis-2'
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            parser: 'YYYY-MM-DDTHH:mm:ss.SSSSSS',
+                            unit: 'minute',
+                            displayFormats: {
+                                minute: 'YYYY-MM-DD HH:mm:ss'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Time时间'
+                        }
+                    },
+                    'y-axis-1': {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Temperature温度 (°C)'
+                        },
+                        ticks: {
+                            stepSize: 2.0
+                        }
+                    },
+                    'y-axis-2': {
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Humidity湿度 (%)'
+                        },
+                        ticks: {
+                            stepSize: 2.0
+                        }
+                    }
+                }
+            }
+        });
+
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar').firstElementChild;
+
+        function showProgressBar() {
+            loadingOverlay.style.display = 'block';
+            progressContainer.style.display = 'block';
+        }
+
+        function hideProgressBar() {
+            loadingOverlay.style.display = 'none';
+            progressContainer.style.display = 'none';
+        }
+
+        function updateProgressBar(percent) {
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+
+        async function fetchDataWithProgress(url) {
+            updateProgressBar(0);
+            const response = await fetch(url);
+            const originalSize = parseInt(response.headers.get('X-Original-Size'), 10);
+            
+            if (response.body && response.body.getReader) {
+                const reader = response.body.getReader();
+                let receivedLength = 0;
+                const chunks = [];
+
+                let lastProgress = 0; // 记录上次更新的进度
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    chunks.push(value);
+                    receivedLength += value.length;
+
+                    // 更新进度条
+                    const progress = ((receivedLength / originalSize) * 100).toFixed(2);
+                    if (Math.abs(progress - lastProgress) >= 0.5) { // 仅当进度变化超过0.5%时更新
+                        requestAnimationFrame(() => {
+                            updateProgressBar(progress);
+                            console.log(`Received ${receivedLength} of ${originalSize} (${progress}%)`);
+                        });
+                        lastProgress = progress; // 更新上次进度值
+                    }
+                }
+
+
+                const chunksAll = new Uint8Array(receivedLength);
+                let position = 0;
+                for(let chunk of chunks) {
+                    chunksAll.set(chunk, position);
+                    position += chunk.length;
+                }
+
+                const result = new TextDecoder("utf-8").decode(chunksAll);
+                return JSON.parse(result);  // 返回解析后的数据
+            } else {
+                // 处理不支持流的浏览器
+                const result = await response.text();
+                return JSON.parse(result);  // 返回解析后的数据
+            }
+        }
+
+
+
+        function formatToISOWithAdjustedTimezone(date) 
+        {
+            const adjustedDate = addHoursToDate(date, 8);
+            return adjustedDate.toISOString().replace('Z', '+08:00');
+        }
+
+        function addHoursToDate(date, hours) 
+        {
+            const newDate = new Date(date);
+            newDate.setHours(newDate.getHours() + hours);
+            return newDate;
+        }
+
+        function fetchInitialData() {
+            if(!autoRefresh) return;
+
+            const currentTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") + "+08:00";
+            const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") + "+08:00";
+            console.log(currentTime);
+            console.log(thirtyMinutesAgo);
+
+            // Fetch data for the specific ID
+            fetch('http://homemoni.xyz/api/tempAndHumi/ID/1')
+                .then(response => response.json())
+                .then(dataForId => {
+                    let minDate = new Date(dataForId.timestamp); // Update minDate to the timestamp from ID 1
+
+                    // Fetch temperature and humidity data for the chart
+                    fetchDataWithProgress(`http://homemoni.xyz/api/tempAndHumi?startTime=${encodeURIComponent(thirtyMinutesAgo)}&endTime=${encodeURIComponent(currentTime)}`)
+                        .then(newData => {
+                            console.log(newData);
+                            dataPoints = newData;
+                            temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                            humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+
+                            tempAndHumiChart.data.datasets[0].data = temperatureData;
+                            tempAndHumiChart.data.datasets[1].data = humidityData;
+                            tempAndHumiChart.options.scales.x.min = new Date(thirtyMinutesAgo);
+                            tempAndHumiChart.options.scales.x.max = new Date(currentTime);
+                            tempAndHumiChart.update();
+
+                            let maxDate = new Date(Math.max(...dataPoints.map(dp => new Date(dp.timestamp))));
+                            document.getElementById('dateRange').innerText = `数据集最早日期：${minDate.toLocaleString()}，最晚：${maxDate.toLocaleString()}`;
+                            initializeStartTimePicker(minDate, maxDate);
+                            initializeEndTimePicker(minDate, maxDate);
+                        })
+                        .catch(error => console.error('Error fetching chart data:', error));
+                })
+                .catch(error => console.error('Error fetching data for ID 1:', error));
+        }
+
+
+
+        function fetchDataForSelectRange(startTime, endTime) {
+            const startTimeISO = formatToISOWithAdjustedTimezone(startTime);
+            const endTimeISO = formatToISOWithAdjustedTimezone(endTime);
+
+            showProgressBar();  // 显示进度条
+
+            fetchDataWithProgress(`http://homemoni.xyz/api/tempAndHumi?startTime=${encodeURIComponent(startTimeISO)}&endTime=${encodeURIComponent(endTimeISO)}`)
+                .then(newData => {
+                    hideProgressBar();  // 隐藏进度条
+                    dataPoints = newData;
+                    temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                    humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+
+                    tempAndHumiChart.data.datasets[0].data = temperatureData;
+                    tempAndHumiChart.data.datasets[1].data = humidityData;
+                    tempAndHumiChart.options.scales.x.min = new Date(startTime);
+                    tempAndHumiChart.options.scales.x.max = new Date(endTime);
+                    tempAndHumiChart.update();
+                })
+                .catch(error => {
+                    hideProgressBar();  // 隐藏进度条
+                    console.error('Error fetching chart data:', error);
+                });
+        }
+
+
+        fetchInitialData(); // 初始获取
+        
+
+        function initializeStartTimePicker(minDate, maxDate) {
+            flatpickr("#startTime", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                minDate: minDate,
+                maxDate: maxDate,
+                onClose: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        selectedStartTime = selectedDates[0];
+                        console.log("select start time: "+selectedStartTime);
+                        checkAndUpdateData();
+                    }
+                }
+            });
+        }
+        function initializeEndTimePicker(minDate, maxDate) {
+            flatpickr("#endTime", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                time_24hr: true,
+                minDate: minDate,
+                maxDate: maxDate,
+                onClose: function(selectedDates) {
+                    if (selectedDates.length > 0) {
+                        selectedEndTime = selectedDates[0];
+                        console.log("select time: "+selectedEndTime);
+                        checkAndUpdateData();
+                    }
+                }
+            });
+        }
+
+        function checkAndUpdateData() {
+            if (selectedStartTime && selectedEndTime) {
+                if (selectedEndTime <= selectedStartTime) {
+                    alert("结束时间必须晚于开始时间。");
+                    return;
+                }
+
+                let startTimeISO=selectedStartTime.toISOString();
+                let endTimeISO=selectedEndTime.toISOString();
+                fetchDataForSelectRange(startTimeISO,endTimeISO);
+                stopAutoRefresh();
+            }
+        }
+
+        function updateChart() {
+            tempAndHumiChart.data.datasets[0].data = temperatureData;
+            tempAndHumiChart.data.datasets[1].data = humidityData;
+            tempAndHumiChart.update();
+        }
+
+        function stopAutoRefresh() {
+            autoRefresh = false;
+        }
+
+        function resetChart() {
+            autoRefresh = true;
+            fetchInitialData();
+        }
+
+        setInterval(fetchInitialData, 30000);
+
+    </script>
+</body>
+</html>

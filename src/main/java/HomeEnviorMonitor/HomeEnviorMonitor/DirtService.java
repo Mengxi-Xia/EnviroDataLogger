@@ -39,4 +39,9 @@ public class DirtService {
         repository.deleteById(id);
     }
 
+
+    public List<DirtRecord> getDirtDataByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        return repository.findByTimestampBetween(startTime, endTime);
+    }
+
 }

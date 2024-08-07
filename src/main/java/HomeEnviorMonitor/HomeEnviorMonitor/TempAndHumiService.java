@@ -39,4 +39,14 @@ public class TempAndHumiService {
         repository.deleteById(id);
     }
 
+
+    public List<TempAndHumiRecord> getTempAndHumiDataByTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
+        long totalRecords = repository.countByTimestampBetween(startTime, endTime);
+        System.out.println("total record: "+totalRecords);
+        int interval = Math.max(1, (int) (totalRecords / 2000)); 
+    
+        return repository.findSampledByTimestampBetween(startTime, endTime, interval);
+    }
+
+
 }

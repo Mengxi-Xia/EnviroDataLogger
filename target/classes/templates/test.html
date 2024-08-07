@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Bar Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        #loading {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 100px;
+            height: 100px;
+        }
+
+        #loading img {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Fullscreen overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Progress bar */
+        #progressContainer {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            width: 80%;
+            max-width: 500px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #progressBar {
+            width: 100%;
+            background: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+        }
+
+        #progressBar div {
+            height: 100%;
+            width: 0;
+            background: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay"></div>
+    <div id="progressContainer">
+        <div id="progressBar"><div>0%</div></div>
+    </div>
+    <script>
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar').firstElementChild;
+
+        function showProgressBar() {
+            loadingOverlay.style.display = 'block';
+            progressContainer.style.display = 'block';
+        }
+
+        function hideProgressBar() {
+            loadingOverlay.style.display = 'none';
+            progressContainer.style.display = 'none';
+        }
+
+        function updateProgressBar(percent) {
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+
+        function fetchDataWithProgress(url, method = 'GET') {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open(method, url);
+
+                xhr.onloadstart = () => {
+                    showProgressBar();
+                    updateProgressBar(0);
+                };
+
+                xhr.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        const percent = Math.round((event.loaded / event.total) * 100);
+                        updateProgressBar(percent);
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve(JSON.parse(xhr.responseText));
+                    } else {
+                        reject(new Error(xhr.statusText));
+                    }
+                };
+
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.onloadend = () => hideProgressBar();
+
+                xhr.send();
+            });
+        }
+
+        function fetchInitialData() {
+            if (!autoRefresh) {
+                return; // 如果 autoRefresh 为 false，直接返回，不执行数据获取
+            }
+
+            const currentTime = new Date().toISOString();
+            const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+            console.log(currentTime);
+            console.log(thirtyMinutesAgo);
+
+            // Fetch data for the specific ID
+            fetchDataWithProgress('http://homemoni.xyz/api/tempAndHumi/ID/1')
+                .then(dataForId => {
+                    let minDate = new Date(dataForId.timestamp); // Update minDate to the timestamp from ID 1
+
+                    // Fetch temperature and humidity data for the chart
+                    fetchDataWithProgress(`http://homemoni.xyz/api/tempAndHumi?startTime=${encodeURIComponent(thirtyMinutesAgo)}&endTime=${encodeURIComponent(currentTime)}`)
+                        .then(newData => {
+                            dataPoints = newData;
+                            temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                            humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+
+                            myChart.data.datasets[0].data = temperatureData;
+                            myChart.data.datasets[1].data = humidityData;
+                            myChart.options.scales.x.min = new Date(thirtyMinutesAgo);
+                            myChart.options.scales.x.max = new Date(currentTime);
+                            myChart.update();
+
+                            let maxDate = new Date(Math.max(...dataPoints.map(dp => new Date(dp.timestamp))));
+                            document.getElementById('dateRange').innerText = `数据集最早日期：${minDate ? minDate.toLocaleString() : ''}，最晚：${maxDate.toLocaleString()}`;
+                            if (minDate) {
+                                initializeStartTimePicker(minDate, maxDate);
+                                initializeEndTimePicker(minDate, maxDate);
+                            }
+                        })
+                        .catch(error => console.error('Error fetching chart data:', error));
+                })
+                .catch(error => console.error('Error fetching data for ID 1:', error));
+        }
+
+        function fetchDataForSelectedRange(startTime, endTime) {
+            const startTimeISO = formatToISOWithAdjustedTimezone(startTime);
+            const endTimeISO = formatToISOWithAdjustedTimezone(endTime);
+
+            fetchDataWithProgress(`http://homemoni.xyz/api/tempAndHumi?startTime=${encodeURIComponent(startTimeISO)}&endTime=${encodeURIComponent(endTimeISO)}`)
+                .then(newData => {
+                    dataPoints = newData;
+                    temperatureData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.temperature }));
+                    humidityData = dataPoints.map(dp => ({ x: dp.timestamp, y: dp.humidity }));
+
+                    myChart.data.datasets[0].data = temperatureData;
+                    myChart.data.datasets[1].data = humidityData;
+                    myChart.options.scales.x.min = new Date(startTime);
+                    myChart.options.scales.x.max = new Date(endTime);
+                    myChart.update();
+                })
+                .catch(error => console.error('Error fetching chart data:', error));
+        }
+
+        function checkAndUpdateData() {
+            if (selectedStartTime && selectedEndTime) {
+                if (selectedEndTime <= selectedStartTime) {
+                    alert("结束时间必须晚于开始时间。");
+                    return;
+                }
+                fetchDataForSelectedRange(selectedStartTime, selectedEndTime);
+                stopAutoRefresh();
+            }
+        }
+
+        // 示例调用
+        const selectedStartTime = new Date('2024-07-30T15:00:00+08:00');
+        const selectedEndTime = new Date('2024-08-01T15:00:00+08:00');
+        checkAndUpdateData();
+
+    </script>
+</body>
+</html>

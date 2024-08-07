@@ -1,0 +1,2329 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ISO C Compiler 
+                                      3 ; Version 4.4.0 #14620 (Mac OS X x86_64)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module tempAndHumidity
+                                      6 	.optsdcc -mmcs51 --model-small
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _main
+                                     12 	.globl _sendDataToServer
+                                     13 	.globl _reopenUART
+                                     14 	.globl _Uart1_Init
+                                     15 	.globl _UART_SendString
+                                     16 	.globl _UART_SendByte
+                                     17 	.globl _DHT22_read
+                                     18 	.globl _DHT22_init
+                                     19 	.globl _display_number
+                                     20 	.globl _INT0_ISR
+                                     21 	.globl _delay_ms
+                                     22 	.globl _delay_us
+                                     23 	.globl _intToStr
+                                     24 	.globl _floatToStr
+                                     25 	.globl _strlen
+                                     26 	.globl _memset
+                                     27 	.globl _strcat
+                                     28 	.globl _CCF0
+                                     29 	.globl _CCF1
+                                     30 	.globl _CCF2
+                                     31 	.globl _CR
+                                     32 	.globl _CF
+                                     33 	.globl _R2I
+                                     34 	.globl _T2I
+                                     35 	.globl _R2B8
+                                     36 	.globl _T2B8
+                                     37 	.globl _R2EN
+                                     38 	.globl _S2M2
+                                     39 	.globl _S2M1
+                                     40 	.globl _S2M0
+                                     41 	.globl _RI
+                                     42 	.globl _TI
+                                     43 	.globl _RB8
+                                     44 	.globl _TB8
+                                     45 	.globl _REN
+                                     46 	.globl _SM2
+                                     47 	.globl _SM1
+                                     48 	.globl _SM0
+                                     49 	.globl _IT0
+                                     50 	.globl _IE0
+                                     51 	.globl _IT1
+                                     52 	.globl _IE1
+                                     53 	.globl _TR0
+                                     54 	.globl _TF0
+                                     55 	.globl _TR1
+                                     56 	.globl _TF1
+                                     57 	.globl _PX0
+                                     58 	.globl _PT0
+                                     59 	.globl _PX1
+                                     60 	.globl _PT1
+                                     61 	.globl _PS
+                                     62 	.globl _PADC
+                                     63 	.globl _PLVD
+                                     64 	.globl _PPCA
+                                     65 	.globl _EX0
+                                     66 	.globl _ET0
+                                     67 	.globl _EX1
+                                     68 	.globl _ET1
+                                     69 	.globl _ES
+                                     70 	.globl _EADC
+                                     71 	.globl _ELVD
+                                     72 	.globl _EA
+                                     73 	.globl _P77
+                                     74 	.globl _P76
+                                     75 	.globl _P75
+                                     76 	.globl _P74
+                                     77 	.globl _P73
+                                     78 	.globl _P72
+                                     79 	.globl _P71
+                                     80 	.globl _P70
+                                     81 	.globl _P67
+                                     82 	.globl _P66
+                                     83 	.globl _P65
+                                     84 	.globl _P64
+                                     85 	.globl _P63
+                                     86 	.globl _P62
+                                     87 	.globl _P61
+                                     88 	.globl _P60
+                                     89 	.globl _P57
+                                     90 	.globl _P56
+                                     91 	.globl _P55
+                                     92 	.globl _P54
+                                     93 	.globl _P53
+                                     94 	.globl _P52
+                                     95 	.globl _P51
+                                     96 	.globl _P50
+                                     97 	.globl _P47
+                                     98 	.globl _P46
+                                     99 	.globl _P45
+                                    100 	.globl _P44
+                                    101 	.globl _P43
+                                    102 	.globl _P42
+                                    103 	.globl _P41
+                                    104 	.globl _P40
+                                    105 	.globl _P37
+                                    106 	.globl _P36
+                                    107 	.globl _P35
+                                    108 	.globl _P34
+                                    109 	.globl _P33
+                                    110 	.globl _P32
+                                    111 	.globl _P31
+                                    112 	.globl _P30
+                                    113 	.globl _P27
+                                    114 	.globl _P26
+                                    115 	.globl _P25
+                                    116 	.globl _P24
+                                    117 	.globl _P23
+                                    118 	.globl _P22
+                                    119 	.globl _P21
+                                    120 	.globl _P20
+                                    121 	.globl _P17
+                                    122 	.globl _P16
+                                    123 	.globl _P15
+                                    124 	.globl _P14
+                                    125 	.globl _P13
+                                    126 	.globl _P12
+                                    127 	.globl _P11
+                                    128 	.globl _P10
+                                    129 	.globl _P07
+                                    130 	.globl _P06
+                                    131 	.globl _P05
+                                    132 	.globl _P04
+                                    133 	.globl _P03
+                                    134 	.globl _P02
+                                    135 	.globl _P01
+                                    136 	.globl _P00
+                                    137 	.globl _P
+                                    138 	.globl _F1
+                                    139 	.globl _OV
+                                    140 	.globl _RS0
+                                    141 	.globl _RS1
+                                    142 	.globl _F0
+                                    143 	.globl _AC
+                                    144 	.globl _CY
+                                    145 	.globl _PWMFDCR
+                                    146 	.globl _PWMIF
+                                    147 	.globl _PWMCR
+                                    148 	.globl _PWMCFG
+                                    149 	.globl _CMPCR2
+                                    150 	.globl _CMPCR1
+                                    151 	.globl _CCAP2H
+                                    152 	.globl _CCAP1H
+                                    153 	.globl _CCAP0H
+                                    154 	.globl _PCA_PWM2
+                                    155 	.globl _PCA_PWM1
+                                    156 	.globl _PCA_PWM0
+                                    157 	.globl _CCAP2L
+                                    158 	.globl _CCAP1L
+                                    159 	.globl _CCAP0L
+                                    160 	.globl _CCAPM2
+                                    161 	.globl _CCAPM1
+                                    162 	.globl _CCAPM0
+                                    163 	.globl _CH
+                                    164 	.globl _CL
+                                    165 	.globl _CMOD
+                                    166 	.globl _CCON
+                                    167 	.globl _IAP_CONTR
+                                    168 	.globl _IAP_TRIG
+                                    169 	.globl _IAP_CMD
+                                    170 	.globl _IAP_ADDRL
+                                    171 	.globl _IAP_ADDRH
+                                    172 	.globl _IAP_DATA
+                                    173 	.globl _SPDAT
+                                    174 	.globl _SPCTL
+                                    175 	.globl _SPSTAT
+                                    176 	.globl _ADC_RESL
+                                    177 	.globl _ADC_RES
+                                    178 	.globl _ADC_CONTR
+                                    179 	.globl _SADEN
+                                    180 	.globl _SADDR
+                                    181 	.globl _S4BUF
+                                    182 	.globl _S4CON
+                                    183 	.globl _S3BUF
+                                    184 	.globl _S3CON
+                                    185 	.globl _S2BUF
+                                    186 	.globl _S2CON
+                                    187 	.globl _SBUF
+                                    188 	.globl _SCON
+                                    189 	.globl _WDT_CONTR
+                                    190 	.globl _WKTCH
+                                    191 	.globl _WKTCL
+                                    192 	.globl _T2L
+                                    193 	.globl _T2H
+                                    194 	.globl _T3L
+                                    195 	.globl _T3H
+                                    196 	.globl _T4L
+                                    197 	.globl _T4H
+                                    198 	.globl _T3T4M
+                                    199 	.globl _T4T3M
+                                    200 	.globl _TH1
+                                    201 	.globl _TH0
+                                    202 	.globl _TL1
+                                    203 	.globl _TL0
+                                    204 	.globl _TMOD
+                                    205 	.globl _TCON
+                                    206 	.globl _INT_CLKO
+                                    207 	.globl _IP2
+                                    208 	.globl _IE2
+                                    209 	.globl _IP
+                                    210 	.globl _IE
+                                    211 	.globl _P_SW2
+                                    212 	.globl _P1ASF
+                                    213 	.globl _BUS_SPEED
+                                    214 	.globl _CLK_DIV
+                                    215 	.globl _P_SW1
+                                    216 	.globl _AUXR1
+                                    217 	.globl _AUXR
+                                    218 	.globl _PCON
+                                    219 	.globl _P7M1
+                                    220 	.globl _P7M0
+                                    221 	.globl _P6M1
+                                    222 	.globl _P6M0
+                                    223 	.globl _P5M1
+                                    224 	.globl _P5M0
+                                    225 	.globl _P4M1
+                                    226 	.globl _P4M0
+                                    227 	.globl _P3M1
+                                    228 	.globl _P3M0
+                                    229 	.globl _P2M1
+                                    230 	.globl _P2M0
+                                    231 	.globl _P1M1
+                                    232 	.globl _P1M0
+                                    233 	.globl _P0M1
+                                    234 	.globl _P0M0
+                                    235 	.globl _P7
+                                    236 	.globl _P6
+                                    237 	.globl _P5
+                                    238 	.globl _P4
+                                    239 	.globl _P3
+                                    240 	.globl _P2
+                                    241 	.globl _P1
+                                    242 	.globl _P0
+                                    243 	.globl _DPH
+                                    244 	.globl _DPL
+                                    245 	.globl _SP
+                                    246 	.globl _PSW
+                                    247 	.globl _B
+                                    248 	.globl _ACC
+                                    249 	.globl _floatToStr_PARM_2
+                                    250 	.globl _sendDataToServer_PARM_2
+                                    251 	.globl _display_number_PARM_2
+                                    252 	.globl _intToStr_PARM_2
+                                    253 	.globl _tempNegativeSign
+                                    254 	.globl _comfimed
+                                    255 	.globl _justPressed
+                                    256 	.globl _displayHumidity
+                                    257 	.globl _data
+                                    258 	.globl _seg_code
+                                    259 ;--------------------------------------------------------
+                                    260 ; special function registers
+                                    261 ;--------------------------------------------------------
+                                    262 	.area RSEG    (ABS,DATA)
+      000000                        263 	.org 0x0000
+                           0000E0   264 _ACC	=	0x00e0
+                           0000F0   265 _B	=	0x00f0
+                           0000D0   266 _PSW	=	0x00d0
+                           000081   267 _SP	=	0x0081
+                           000082   268 _DPL	=	0x0082
+                           000083   269 _DPH	=	0x0083
+                           000080   270 _P0	=	0x0080
+                           000090   271 _P1	=	0x0090
+                           0000A0   272 _P2	=	0x00a0
+                           0000B0   273 _P3	=	0x00b0
+                           0000C0   274 _P4	=	0x00c0
+                           0000C8   275 _P5	=	0x00c8
+                           0000E8   276 _P6	=	0x00e8
+                           0000F8   277 _P7	=	0x00f8
+                           000094   278 _P0M0	=	0x0094
+                           000093   279 _P0M1	=	0x0093
+                           000092   280 _P1M0	=	0x0092
+                           000091   281 _P1M1	=	0x0091
+                           000096   282 _P2M0	=	0x0096
+                           000095   283 _P2M1	=	0x0095
+                           0000B2   284 _P3M0	=	0x00b2
+                           0000B1   285 _P3M1	=	0x00b1
+                           0000B4   286 _P4M0	=	0x00b4
+                           0000B3   287 _P4M1	=	0x00b3
+                           0000CA   288 _P5M0	=	0x00ca
+                           0000C9   289 _P5M1	=	0x00c9
+                           0000CC   290 _P6M0	=	0x00cc
+                           0000CB   291 _P6M1	=	0x00cb
+                           0000E2   292 _P7M0	=	0x00e2
+                           0000E1   293 _P7M1	=	0x00e1
+                           000087   294 _PCON	=	0x0087
+                           00008E   295 _AUXR	=	0x008e
+                           0000A2   296 _AUXR1	=	0x00a2
+                           0000A2   297 _P_SW1	=	0x00a2
+                           000097   298 _CLK_DIV	=	0x0097
+                           0000A1   299 _BUS_SPEED	=	0x00a1
+                           00009D   300 _P1ASF	=	0x009d
+                           0000BA   301 _P_SW2	=	0x00ba
+                           0000A8   302 _IE	=	0x00a8
+                           0000B8   303 _IP	=	0x00b8
+                           0000AF   304 _IE2	=	0x00af
+                           0000B5   305 _IP2	=	0x00b5
+                           00008F   306 _INT_CLKO	=	0x008f
+                           000088   307 _TCON	=	0x0088
+                           000089   308 _TMOD	=	0x0089
+                           00008A   309 _TL0	=	0x008a
+                           00008B   310 _TL1	=	0x008b
+                           00008C   311 _TH0	=	0x008c
+                           00008D   312 _TH1	=	0x008d
+                           0000D1   313 _T4T3M	=	0x00d1
+                           0000D1   314 _T3T4M	=	0x00d1
+                           0000D2   315 _T4H	=	0x00d2
+                           0000D3   316 _T4L	=	0x00d3
+                           0000D4   317 _T3H	=	0x00d4
+                           0000D5   318 _T3L	=	0x00d5
+                           0000D6   319 _T2H	=	0x00d6
+                           0000D7   320 _T2L	=	0x00d7
+                           0000AA   321 _WKTCL	=	0x00aa
+                           0000AB   322 _WKTCH	=	0x00ab
+                           0000C1   323 _WDT_CONTR	=	0x00c1
+                           000098   324 _SCON	=	0x0098
+                           000099   325 _SBUF	=	0x0099
+                           00009A   326 _S2CON	=	0x009a
+                           00009B   327 _S2BUF	=	0x009b
+                           0000AC   328 _S3CON	=	0x00ac
+                           0000AD   329 _S3BUF	=	0x00ad
+                           000084   330 _S4CON	=	0x0084
+                           000085   331 _S4BUF	=	0x0085
+                           0000A9   332 _SADDR	=	0x00a9
+                           0000B9   333 _SADEN	=	0x00b9
+                           0000BC   334 _ADC_CONTR	=	0x00bc
+                           0000BD   335 _ADC_RES	=	0x00bd
+                           0000BE   336 _ADC_RESL	=	0x00be
+                           0000CD   337 _SPSTAT	=	0x00cd
+                           0000CE   338 _SPCTL	=	0x00ce
+                           0000CF   339 _SPDAT	=	0x00cf
+                           0000C2   340 _IAP_DATA	=	0x00c2
+                           0000C3   341 _IAP_ADDRH	=	0x00c3
+                           0000C4   342 _IAP_ADDRL	=	0x00c4
+                           0000C5   343 _IAP_CMD	=	0x00c5
+                           0000C6   344 _IAP_TRIG	=	0x00c6
+                           0000C7   345 _IAP_CONTR	=	0x00c7
+                           0000D8   346 _CCON	=	0x00d8
+                           0000D9   347 _CMOD	=	0x00d9
+                           0000E9   348 _CL	=	0x00e9
+                           0000F9   349 _CH	=	0x00f9
+                           0000DA   350 _CCAPM0	=	0x00da
+                           0000DB   351 _CCAPM1	=	0x00db
+                           0000DC   352 _CCAPM2	=	0x00dc
+                           0000EA   353 _CCAP0L	=	0x00ea
+                           0000EB   354 _CCAP1L	=	0x00eb
+                           0000EC   355 _CCAP2L	=	0x00ec
+                           0000F2   356 _PCA_PWM0	=	0x00f2
+                           0000F3   357 _PCA_PWM1	=	0x00f3
+                           0000F4   358 _PCA_PWM2	=	0x00f4
+                           0000FA   359 _CCAP0H	=	0x00fa
+                           0000FB   360 _CCAP1H	=	0x00fb
+                           0000FC   361 _CCAP2H	=	0x00fc
+                           0000E6   362 _CMPCR1	=	0x00e6
+                           0000E7   363 _CMPCR2	=	0x00e7
+                           0000F1   364 _PWMCFG	=	0x00f1
+                           0000F5   365 _PWMCR	=	0x00f5
+                           0000F6   366 _PWMIF	=	0x00f6
+                           0000F7   367 _PWMFDCR	=	0x00f7
+                                    368 ;--------------------------------------------------------
+                                    369 ; special function bits
+                                    370 ;--------------------------------------------------------
+                                    371 	.area RSEG    (ABS,DATA)
+      000000                        372 	.org 0x0000
+                           0000D7   373 _CY	=	0x00d7
+                           0000D6   374 _AC	=	0x00d6
+                           0000D5   375 _F0	=	0x00d5
+                           0000D4   376 _RS1	=	0x00d4
+                           0000D3   377 _RS0	=	0x00d3
+                           0000D2   378 _OV	=	0x00d2
+                           0000D1   379 _F1	=	0x00d1
+                           0000D0   380 _P	=	0x00d0
+                           000080   381 _P00	=	0x0080
+                           000081   382 _P01	=	0x0081
+                           000082   383 _P02	=	0x0082
+                           000083   384 _P03	=	0x0083
+                           000084   385 _P04	=	0x0084
+                           000085   386 _P05	=	0x0085
+                           000086   387 _P06	=	0x0086
+                           000087   388 _P07	=	0x0087
+                           000090   389 _P10	=	0x0090
+                           000091   390 _P11	=	0x0091
+                           000092   391 _P12	=	0x0092
+                           000093   392 _P13	=	0x0093
+                           000094   393 _P14	=	0x0094
+                           000095   394 _P15	=	0x0095
+                           000096   395 _P16	=	0x0096
+                           000097   396 _P17	=	0x0097
+                           0000A0   397 _P20	=	0x00a0
+                           0000A1   398 _P21	=	0x00a1
+                           0000A2   399 _P22	=	0x00a2
+                           0000A3   400 _P23	=	0x00a3
+                           0000A4   401 _P24	=	0x00a4
+                           0000A5   402 _P25	=	0x00a5
+                           0000A6   403 _P26	=	0x00a6
+                           0000A7   404 _P27	=	0x00a7
+                           0000B0   405 _P30	=	0x00b0
+                           0000B1   406 _P31	=	0x00b1
+                           0000B2   407 _P32	=	0x00b2
+                           0000B3   408 _P33	=	0x00b3
+                           0000B4   409 _P34	=	0x00b4
+                           0000B5   410 _P35	=	0x00b5
+                           0000B6   411 _P36	=	0x00b6
+                           0000B7   412 _P37	=	0x00b7
+                           0000C0   413 _P40	=	0x00c0
+                           0000C1   414 _P41	=	0x00c1
+                           0000C2   415 _P42	=	0x00c2
+                           0000C3   416 _P43	=	0x00c3
+                           0000C4   417 _P44	=	0x00c4
+                           0000C5   418 _P45	=	0x00c5
+                           0000C6   419 _P46	=	0x00c6
+                           0000C7   420 _P47	=	0x00c7
+                           0000C8   421 _P50	=	0x00c8
+                           0000C9   422 _P51	=	0x00c9
+                           0000CA   423 _P52	=	0x00ca
+                           0000CB   424 _P53	=	0x00cb
+                           0000CC   425 _P54	=	0x00cc
+                           0000CD   426 _P55	=	0x00cd
+                           0000CE   427 _P56	=	0x00ce
+                           0000CF   428 _P57	=	0x00cf
+                           0000E8   429 _P60	=	0x00e8
+                           0000E9   430 _P61	=	0x00e9
+                           0000EA   431 _P62	=	0x00ea
+                           0000EB   432 _P63	=	0x00eb
+                           0000EC   433 _P64	=	0x00ec
+                           0000ED   434 _P65	=	0x00ed
+                           0000EE   435 _P66	=	0x00ee
+                           0000EF   436 _P67	=	0x00ef
+                           0000F8   437 _P70	=	0x00f8
+                           0000F9   438 _P71	=	0x00f9
+                           0000FA   439 _P72	=	0x00fa
+                           0000FB   440 _P73	=	0x00fb
+                           0000FC   441 _P74	=	0x00fc
+                           0000FD   442 _P75	=	0x00fd
+                           0000FE   443 _P76	=	0x00fe
+                           0000FF   444 _P77	=	0x00ff
+                           0000AF   445 _EA	=	0x00af
+                           0000AE   446 _ELVD	=	0x00ae
+                           0000AD   447 _EADC	=	0x00ad
+                           0000AC   448 _ES	=	0x00ac
+                           0000AB   449 _ET1	=	0x00ab
+                           0000AA   450 _EX1	=	0x00aa
+                           0000A9   451 _ET0	=	0x00a9
+                           0000A8   452 _EX0	=	0x00a8
+                           0000BF   453 _PPCA	=	0x00bf
+                           0000BE   454 _PLVD	=	0x00be
+                           0000BD   455 _PADC	=	0x00bd
+                           0000BC   456 _PS	=	0x00bc
+                           0000BB   457 _PT1	=	0x00bb
+                           0000BA   458 _PX1	=	0x00ba
+                           0000B9   459 _PT0	=	0x00b9
+                           0000B8   460 _PX0	=	0x00b8
+                           00008F   461 _TF1	=	0x008f
+                           00008E   462 _TR1	=	0x008e
+                           00008D   463 _TF0	=	0x008d
+                           00008C   464 _TR0	=	0x008c
+                           00008B   465 _IE1	=	0x008b
+                           00008A   466 _IT1	=	0x008a
+                           000089   467 _IE0	=	0x0089
+                           000088   468 _IT0	=	0x0088
+                           00009F   469 _SM0	=	0x009f
+                           00009E   470 _SM1	=	0x009e
+                           00009D   471 _SM2	=	0x009d
+                           00009C   472 _REN	=	0x009c
+                           00009B   473 _TB8	=	0x009b
+                           00009A   474 _RB8	=	0x009a
+                           000099   475 _TI	=	0x0099
+                           000098   476 _RI	=	0x0098
+                           0000A1   477 _S2M0	=	0x00a1
+                           0000A0   478 _S2M1	=	0x00a0
+                           00009F   479 _S2M2	=	0x009f
+                           00009E   480 _R2EN	=	0x009e
+                           00009D   481 _T2B8	=	0x009d
+                           00009C   482 _R2B8	=	0x009c
+                           00009B   483 _T2I	=	0x009b
+                           00009A   484 _R2I	=	0x009a
+                           0000DF   485 _CF	=	0x00df
+                           0000DE   486 _CR	=	0x00de
+                           0000DA   487 _CCF2	=	0x00da
+                           0000D9   488 _CCF1	=	0x00d9
+                           0000D8   489 _CCF0	=	0x00d8
+                                    490 ;--------------------------------------------------------
+                                    491 ; overlayable register banks
+                                    492 ;--------------------------------------------------------
+                                    493 	.area REG_BANK_0	(REL,OVR,DATA)
+      000000                        494 	.ds 8
+                                    495 ;--------------------------------------------------------
+                                    496 ; internal ram data
+                                    497 ;--------------------------------------------------------
+                                    498 	.area DSEG    (DATA)
+      000000                        499 _seg_code::
+      000000                        500 	.ds 11
+      00000B                        501 _data::
+      00000B                        502 	.ds 5
+      000010                        503 _displayHumidity::
+      000010                        504 	.ds 1
+      000011                        505 _justPressed::
+      000011                        506 	.ds 1
+      000012                        507 _comfimed::
+      000012                        508 	.ds 2
+      000014                        509 _tempNegativeSign::
+      000014                        510 	.ds 1
+      000015                        511 _floatToStr_num_10000_49:
+      000015                        512 	.ds 4
+      000019                        513 _floatToStr_negative_10000_50:
+      000019                        514 	.ds 1
+      00001A                        515 _floatToStr_integerPart_10001_52:
+      00001A                        516 	.ds 2
+      00001C                        517 _floatToStr_start_10002_54:
+      00001C                        518 	.ds 2
+      00001E                        519 _floatToStr_temp_30003_59:
+      00001E                        520 	.ds 1
+      00001F                        521 _floatToStr_sloc0_1_0:
+      00001F                        522 	.ds 2
+      000021                        523 _floatToStr_sloc1_1_0:
+      000021                        524 	.ds 2
+      000023                        525 _floatToStr_sloc2_1_0:
+      000023                        526 	.ds 2
+      000025                        527 _intToStr_PARM_2:
+      000025                        528 	.ds 3
+      000028                        529 _intToStr_i_10000_61:
+      000028                        530 	.ds 2
+      00002A                        531 _intToStr_start_10001_63:
+      00002A                        532 	.ds 2
+      00002C                        533 _intToStr_temp_10001_63:
+      00002C                        534 	.ds 1
+      00002D                        535 _intToStr_sloc0_1_0:
+      00002D                        536 	.ds 3
+      000030                        537 _display_number_PARM_2:
+      000030                        538 	.ds 1
+      000031                        539 _sendDataToServer_PARM_2:
+      000031                        540 	.ds 4
+      000035                        541 _main_tempSecondDigit_30002_109:
+      000035                        542 	.ds 1
+      000036                        543 _main_tempFirstDigit_30002_109:
+      000036                        544 	.ds 1
+      000037                        545 _main_tempPointFirstDigit_30002_109:
+      000037                        546 	.ds 1
+      000038                        547 _main_humidityThirdDigit_30002_109:
+      000038                        548 	.ds 1
+      000039                        549 _main_humiditySecondDigit_30002_109:
+      000039                        550 	.ds 1
+      00003A                        551 _main_humidityFirstDigit_30002_109:
+      00003A                        552 	.ds 1
+      00003B                        553 _main_humidityPointFirstDigit_30002_109:
+      00003B                        554 	.ds 1
+      00003C                        555 _main_true_temp_30002_109:
+      00003C                        556 	.ds 4
+                                    557 ;--------------------------------------------------------
+                                    558 ; overlayable items in internal ram
+                                    559 ;--------------------------------------------------------
+                                    560 	.area	OSEG    (OVR,DATA)
+                                    561 	.area	OSEG    (OVR,DATA)
+                                    562 ;--------------------------------------------------------
+                                    563 ; Stack segment in internal ram
+                                    564 ;--------------------------------------------------------
+                                    565 	.area SSEG
+      000000                        566 __start__stack:
+      000000                        567 	.ds	1
+                                    568 
+                                    569 ;--------------------------------------------------------
+                                    570 ; indirectly addressable internal ram data
+                                    571 ;--------------------------------------------------------
+                                    572 	.area ISEG    (DATA)
+                                    573 ;--------------------------------------------------------
+                                    574 ; absolute internal ram data
+                                    575 ;--------------------------------------------------------
+                                    576 	.area IABS    (ABS,DATA)
+                                    577 	.area IABS    (ABS,DATA)
+                                    578 ;--------------------------------------------------------
+                                    579 ; bit data
+                                    580 ;--------------------------------------------------------
+                                    581 	.area BSEG    (BIT)
+                                    582 ;--------------------------------------------------------
+                                    583 ; paged external ram data
+                                    584 ;--------------------------------------------------------
+                                    585 	.area PSEG    (PAG,XDATA)
+                                    586 ;--------------------------------------------------------
+                                    587 ; uninitialized external ram data
+                                    588 ;--------------------------------------------------------
+                                    589 	.area XSEG    (XDATA)
+      000000                        590 _floatToStr_PARM_2:
+      000000                        591 	.ds 2
+      000002                        592 _sendDataToServer_body_10001_99:
+      000002                        593 	.ds 200
+      0000CA                        594 _sendDataToServer_tempStr_10002_100:
+      0000CA                        595 	.ds 6
+      0000D0                        596 _sendDataToServer_humiStr_10003_101:
+      0000D0                        597 	.ds 6
+      0000D6                        598 _sendDataToServer_bodyLengthStr_10005_103:
+      0000D6                        599 	.ds 4
+                                    600 ;--------------------------------------------------------
+                                    601 ; absolute external ram data
+                                    602 ;--------------------------------------------------------
+                                    603 	.area XABS    (ABS,XDATA)
+                                    604 ;--------------------------------------------------------
+                                    605 ; initialized external ram data
+                                    606 ;--------------------------------------------------------
+                                    607 	.area XISEG   (XDATA)
+                                    608 	.area HOME    (CODE)
+                                    609 	.area GSINIT0 (CODE)
+                                    610 	.area GSINIT1 (CODE)
+                                    611 	.area GSINIT2 (CODE)
+                                    612 	.area GSINIT3 (CODE)
+                                    613 	.area GSINIT4 (CODE)
+                                    614 	.area GSINIT5 (CODE)
+                                    615 	.area GSINIT  (CODE)
+                                    616 	.area GSFINAL (CODE)
+                                    617 	.area CSEG    (CODE)
+                                    618 ;--------------------------------------------------------
+                                    619 ; interrupt vector
+                                    620 ;--------------------------------------------------------
+                                    621 	.area HOME    (CODE)
+      000000                        622 __interrupt_vect:
+      000000 02r00r00         [24]  623 	ljmp	__sdcc_gsinit_startup
+      000003 02r03r16         [24]  624 	ljmp	_INT0_ISR
+                                    625 ;--------------------------------------------------------
+                                    626 ; global & static initialisations
+                                    627 ;--------------------------------------------------------
+                                    628 	.area HOME    (CODE)
+                                    629 	.area GSINIT  (CODE)
+                                    630 	.area GSFINAL (CODE)
+                                    631 	.area GSINIT  (CODE)
+                                    632 	.globl __sdcc_gsinit_startup
+                                    633 	.globl __sdcc_program_startup
+                                    634 	.globl __start__stack
+                                    635 	.globl __mcs51_genXINIT
+                                    636 	.globl __mcs51_genXRAMCLEAR
+                                    637 	.globl __mcs51_genRAMCLEAR
+                                    638 ;	tempAndHumidity.c:35: unsigned char seg_code[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F, 0x40};
+      000000 75*00 3F         [24]  639 	mov	_seg_code,#0x3f
+      000003 75*01 06         [24]  640 	mov	(_seg_code + 0x0001),#0x06
+      000006 75*02 5B         [24]  641 	mov	(_seg_code + 0x0002),#0x5b
+      000009 75*03 4F         [24]  642 	mov	(_seg_code + 0x0003),#0x4f
+      00000C 75*04 66         [24]  643 	mov	(_seg_code + 0x0004),#0x66
+      00000F 75*05 6D         [24]  644 	mov	(_seg_code + 0x0005),#0x6d
+      000012 75*06 7D         [24]  645 	mov	(_seg_code + 0x0006),#0x7d
+      000015 75*07 07         [24]  646 	mov	(_seg_code + 0x0007),#0x07
+      000018 75*08 7F         [24]  647 	mov	(_seg_code + 0x0008),#0x7f
+      00001B 75*09 6F         [24]  648 	mov	(_seg_code + 0x0009),#0x6f
+      00001E 75*0A 40         [24]  649 	mov	(_seg_code + 0x000a),#0x40
+                                    650 	.area GSFINAL (CODE)
+      000000 02r00r06         [24]  651 	ljmp	__sdcc_program_startup
+                                    652 ;--------------------------------------------------------
+                                    653 ; Home
+                                    654 ;--------------------------------------------------------
+                                    655 	.area HOME    (CODE)
+                                    656 	.area HOME    (CODE)
+      000006                        657 __sdcc_program_startup:
+      000006 02r05rF2         [24]  658 	ljmp	_main
+                                    659 ;	return from main will return to caller
+                                    660 ;--------------------------------------------------------
+                                    661 ; code
+                                    662 ;--------------------------------------------------------
+                                    663 	.area CSEG    (CODE)
+                                    664 ;------------------------------------------------------------
+                                    665 ;Allocation info for local variables in function 'floatToStr'
+                                    666 ;------------------------------------------------------------
+                                    667 ;num                       Allocated with name '_floatToStr_num_10000_49'
+                                    668 ;negative                  Allocated with name '_floatToStr_negative_10000_50'
+                                    669 ;integerPart               Allocated with name '_floatToStr_integerPart_10001_52'
+                                    670 ;decimalPart               Allocated to registers 
+                                    671 ;i                         Allocated to registers r1 r2 
+                                    672 ;start                     Allocated with name '_floatToStr_start_10002_54'
+                                    673 ;end                       Allocated to registers 
+                                    674 ;temp                      Allocated with name '_floatToStr_temp_30003_59'
+                                    675 ;sloc0                     Allocated with name '_floatToStr_sloc0_1_0'
+                                    676 ;sloc1                     Allocated with name '_floatToStr_sloc1_1_0'
+                                    677 ;sloc2                     Allocated with name '_floatToStr_sloc2_1_0'
+                                    678 ;str                       Allocated with name '_floatToStr_PARM_2'
+                                    679 ;------------------------------------------------------------
+                                    680 ;	tempAndHumidity.c:43: void floatToStr(float num,__xdata unsigned char str[]) 
+                                    681 ;	-----------------------------------------
+                                    682 ;	 function floatToStr
+                                    683 ;	-----------------------------------------
+      000000                        684 _floatToStr:
+                           000007   685 	ar7 = 0x07
+                           000006   686 	ar6 = 0x06
+                           000005   687 	ar5 = 0x05
+                           000004   688 	ar4 = 0x04
+                           000003   689 	ar3 = 0x03
+                           000002   690 	ar2 = 0x02
+                           000001   691 	ar1 = 0x01
+                           000000   692 	ar0 = 0x00
+      000000 85 82*15         [24]  693 	mov	_floatToStr_num_10000_49,dpl
+      000003 85 83*16         [24]  694 	mov	(_floatToStr_num_10000_49 + 1),dph
+      000006 85 F0*17         [24]  695 	mov	(_floatToStr_num_10000_49 + 2),b
+      000009 F5*18            [12]  696 	mov	(_floatToStr_num_10000_49 + 3),a
+                                    697 ;	tempAndHumidity.c:45: bool negative = 0;
+                                    698 ;	tempAndHumidity.c:46: if (num < 0) 
+      00000B E4               [12]  699 	clr	a
+      00000C F5*19            [12]  700 	mov	_floatToStr_negative_10000_50,a
+      00000E C0 E0            [24]  701 	push	acc
+      000010 C0 E0            [24]  702 	push	acc
+      000012 C0 E0            [24]  703 	push	acc
+      000014 C0 E0            [24]  704 	push	acc
+      000016 85*15 82         [24]  705 	mov	dpl, _floatToStr_num_10000_49
+      000019 85*16 83         [24]  706 	mov	dph, (_floatToStr_num_10000_49 + 1)
+      00001C 85*17 F0         [24]  707 	mov	b, (_floatToStr_num_10000_49 + 2)
+      00001F E5*18            [12]  708 	mov	a, (_floatToStr_num_10000_49 + 3)
+      000021 12r00r00         [24]  709 	lcall	___fslt
+      000024 AB 82            [24]  710 	mov	r3, dpl
+      000026 E5 81            [12]  711 	mov	a,sp
+      000028 24 FC            [12]  712 	add	a,#0xfc
+      00002A F5 81            [12]  713 	mov	sp,a
+      00002C EB               [12]  714 	mov	a,r3
+      00002D 60 09            [24]  715 	jz	00102$
+                                    716 ;	tempAndHumidity.c:48: num = -num;
+      00002F E5*18            [12]  717 	mov	a,(_floatToStr_num_10000_49 + 3)
+      000031 B2 E7            [12]  718 	cpl	acc.7
+      000033 F5*18            [12]  719 	mov	(_floatToStr_num_10000_49 + 3),a
+                                    720 ;	tempAndHumidity.c:49: negative = 1;
+      000035 75*19 01         [24]  721 	mov	_floatToStr_negative_10000_50,#0x01
+      000038                        722 00102$:
+                                    723 ;	tempAndHumidity.c:52: int integerPart = (int)num;
+      000038 85*15 82         [24]  724 	mov	dpl, _floatToStr_num_10000_49
+      00003B 85*16 83         [24]  725 	mov	dph, (_floatToStr_num_10000_49 + 1)
+      00003E 85*17 F0         [24]  726 	mov	b, (_floatToStr_num_10000_49 + 2)
+      000041 E5*18            [12]  727 	mov	a, (_floatToStr_num_10000_49 + 3)
+      000043 12r00r00         [24]  728 	lcall	___fs2sint
+                                    729 ;	tempAndHumidity.c:53: int decimalPart = (int)((num - (float)integerPart) * 10);
+      000046 85 82*1A         [24]  730 	mov	_floatToStr_integerPart_10001_52,dpl
+      000049 85 83*1B         [24]  731 	mov  (_floatToStr_integerPart_10001_52 + 1),dph
+      00004C 12r00r00         [24]  732 	lcall	___sint2fs
+      00004F A8 82            [24]  733 	mov	r0, dpl
+      000051 A9 83            [24]  734 	mov	r1, dph
+      000053 AE F0            [24]  735 	mov	r6, b
+      000055 FF               [12]  736 	mov	r7, a
+      000056 C0 00            [24]  737 	push	ar0
+      000058 C0 01            [24]  738 	push	ar1
+      00005A C0 06            [24]  739 	push	ar6
+      00005C C0 07            [24]  740 	push	ar7
+      00005E 85*15 82         [24]  741 	mov	dpl, _floatToStr_num_10000_49
+      000061 85*16 83         [24]  742 	mov	dph, (_floatToStr_num_10000_49 + 1)
+      000064 85*17 F0         [24]  743 	mov	b, (_floatToStr_num_10000_49 + 2)
+      000067 E5*18            [12]  744 	mov	a, (_floatToStr_num_10000_49 + 3)
+      000069 12r00r00         [24]  745 	lcall	___fssub
+      00006C AC 82            [24]  746 	mov	r4, dpl
+      00006E AD 83            [24]  747 	mov	r5, dph
+      000070 AE F0            [24]  748 	mov	r6, b
+      000072 FF               [12]  749 	mov	r7, a
+      000073 E5 81            [12]  750 	mov	a,sp
+      000075 24 FC            [12]  751 	add	a,#0xfc
+      000077 F5 81            [12]  752 	mov	sp,a
+      000079 C0 04            [24]  753 	push	ar4
+      00007B C0 05            [24]  754 	push	ar5
+      00007D C0 06            [24]  755 	push	ar6
+      00007F C0 07            [24]  756 	push	ar7
+      000081 90 00 00         [24]  757 	mov	dptr,#0x0000
+      000084 75 F0 20         [24]  758 	mov	b, #0x20
+      000087 74 41            [12]  759 	mov	a, #0x41
+      000089 12r00r00         [24]  760 	lcall	___fsmul
+      00008C AC 82            [24]  761 	mov	r4, dpl
+      00008E AD 83            [24]  762 	mov	r5, dph
+      000090 AE F0            [24]  763 	mov	r6, b
+      000092 FF               [12]  764 	mov	r7, a
+      000093 E5 81            [12]  765 	mov	a,sp
+      000095 24 FC            [12]  766 	add	a,#0xfc
+      000097 F5 81            [12]  767 	mov	sp,a
+      000099 8C 82            [24]  768 	mov	dpl, r4
+      00009B 8D 83            [24]  769 	mov	dph, r5
+      00009D 8E F0            [24]  770 	mov	b, r6
+      00009F EF               [12]  771 	mov	a, r7
+      0000A0 12r00r00         [24]  772 	lcall	___fs2sint
+      0000A3 AF 82            [24]  773 	mov	r7, dpl
+                                    774 ;	tempAndHumidity.c:55: int i = 0;
+                                    775 ;	tempAndHumidity.c:56: if (negative) 
+      0000A5 E4               [12]  776 	clr	a
+      0000A6 FD               [12]  777 	mov	r5,a
+      0000A7 FE               [12]  778 	mov	r6,a
+      0000A8 E5*19            [12]  779 	mov	a,_floatToStr_negative_10000_50
+      0000AA 60 13            [24]  780 	jz	00104$
+                                    781 ;	tempAndHumidity.c:58: str[i++] = '-';
+      0000AC 7D 01            [12]  782 	mov	r5,#0x01
+      0000AE 7E 00            [12]  783 	mov	r6,#0x00
+      0000B0 90r00r00         [24]  784 	mov	dptr,#_floatToStr_PARM_2
+      0000B3 E0               [24]  785 	movx	a,@dptr
+      0000B4 F9               [12]  786 	mov	r1,a
+      0000B5 A3               [24]  787 	inc	dptr
+      0000B6 E0               [24]  788 	movx	a,@dptr
+      0000B7 FC               [12]  789 	mov	r4,a
+      0000B8 89 82            [24]  790 	mov	dpl,r1
+      0000BA 8C 83            [24]  791 	mov	dph,r4
+      0000BC 74 2D            [12]  792 	mov	a,#0x2d
+      0000BE F0               [24]  793 	movx	@dptr,a
+      0000BF                        794 00104$:
+                                    795 ;	tempAndHumidity.c:60: int start = i;
+      0000BF 8D*1C            [24]  796 	mov	_floatToStr_start_10002_54,r5
+      0000C1 8E*1D            [24]  797 	mov	(_floatToStr_start_10002_54 + 1),r6
+                                    798 ;	tempAndHumidity.c:61: if (integerPart == 0) 
+      0000C3 E5*1A            [12]  799 	mov	a,_floatToStr_integerPart_10001_52
+      0000C5 45*1B            [12]  800 	orl	a,(_floatToStr_integerPart_10001_52 + 1)
+      0000C7 70 23            [24]  801 	jnz	00120$
+                                    802 ;	tempAndHumidity.c:63: str[i++] = '0';
+      0000C9 C0 07            [24]  803 	push	ar7
+      0000CB 74 01            [12]  804 	mov	a,#0x01
+      0000CD 2D               [12]  805 	add	a, r5
+      0000CE F5*1F            [12]  806 	mov	_floatToStr_sloc0_1_0,a
+      0000D0 E4               [12]  807 	clr	a
+      0000D1 3E               [12]  808 	addc	a, r6
+      0000D2 F5*20            [12]  809 	mov	(_floatToStr_sloc0_1_0 + 1),a
+      0000D4 90r00r00         [24]  810 	mov	dptr,#_floatToStr_PARM_2
+      0000D7 E0               [24]  811 	movx	a,@dptr
+      0000D8 F8               [12]  812 	mov	r0,a
+      0000D9 A3               [24]  813 	inc	dptr
+      0000DA E0               [24]  814 	movx	a,@dptr
+      0000DB FF               [12]  815 	mov	r7,a
+      0000DC ED               [12]  816 	mov	a,r5
+      0000DD 28               [12]  817 	add	a, r0
+      0000DE F5 82            [12]  818 	mov	dpl,a
+      0000E0 EE               [12]  819 	mov	a,r6
+      0000E1 3F               [12]  820 	addc	a, r7
+      0000E2 F5 83            [12]  821 	mov	dph,a
+      0000E4 74 30            [12]  822 	mov	a,#0x30
+      0000E6 F0               [24]  823 	movx	@dptr,a
+      0000E7 D0 07            [24]  824 	pop	ar7
+      0000E9 02r01rAD         [24]  825 	ljmp	00113$
+                                    826 ;	tempAndHumidity.c:66: while (integerPart != 0) 
+      0000EC                        827 00120$:
+      0000EC 90r00r00         [24]  828 	mov	dptr,#_floatToStr_PARM_2
+      0000EF E0               [24]  829 	movx	a,@dptr
+      0000F0 F5*21            [12]  830 	mov	_floatToStr_sloc1_1_0,a
+      0000F2 A3               [24]  831 	inc	dptr
+      0000F3 E0               [24]  832 	movx	a,@dptr
+      0000F4 F5*22            [12]  833 	mov	(_floatToStr_sloc1_1_0 + 1),a
+      0000F6                        834 00105$:
+      0000F6 E5*1A            [12]  835 	mov	a,_floatToStr_integerPart_10001_52
+      0000F8 45*1B            [12]  836 	orl	a,(_floatToStr_integerPart_10001_52 + 1)
+      0000FA 60 51            [24]  837 	jz	00123$
+                                    838 ;	tempAndHumidity.c:68: str[i++] = (integerPart % 10) + '0';
+      0000FC ED               [12]  839 	mov	a,r5
+      0000FD 25*21            [12]  840 	add	a, _floatToStr_sloc1_1_0
+      0000FF F8               [12]  841 	mov	r0,a
+      000100 EE               [12]  842 	mov	a,r6
+      000101 35*22            [12]  843 	addc	a, (_floatToStr_sloc1_1_0 + 1)
+      000103 FC               [12]  844 	mov	r4,a
+      000104 0D               [12]  845 	inc	r5
+      000105 BD 00 01         [24]  846 	cjne	r5,#0x00,00171$
+      000108 0E               [12]  847 	inc	r6
+      000109                        848 00171$:
+      000109 75*00 0A         [24]  849 	mov	__modsint_PARM_2,#0x0a
+      00010C 75*01 00         [24]  850 	mov	(__modsint_PARM_2 + 1),#0x00
+      00010F 85*1A 82         [24]  851 	mov	dpl, _floatToStr_integerPart_10001_52
+      000112 85*1B 83         [24]  852 	mov	dph, (_floatToStr_integerPart_10001_52 + 1)
+      000115 C0 07            [24]  853 	push	ar7
+      000117 C0 06            [24]  854 	push	ar6
+      000119 C0 05            [24]  855 	push	ar5
+      00011B C0 04            [24]  856 	push	ar4
+      00011D C0 00            [24]  857 	push	ar0
+      00011F 12r00r00         [24]  858 	lcall	__modsint
+      000122 A9 82            [24]  859 	mov	r1, dpl
+      000124 D0 00            [24]  860 	pop	ar0
+      000126 D0 04            [24]  861 	pop	ar4
+      000128 74 30            [12]  862 	mov	a,#0x30
+      00012A 29               [12]  863 	add	a, r1
+      00012B 88 82            [24]  864 	mov	dpl,r0
+      00012D 8C 83            [24]  865 	mov	dph,r4
+      00012F F0               [24]  866 	movx	@dptr,a
+                                    867 ;	tempAndHumidity.c:69: integerPart /= 10;
+      000130 75*00 0A         [24]  868 	mov	__divsint_PARM_2,#0x0a
+      000133 75*01 00         [24]  869 	mov	(__divsint_PARM_2 + 1),#0x00
+      000136 85*1A 82         [24]  870 	mov	dpl, _floatToStr_integerPart_10001_52
+      000139 85*1B 83         [24]  871 	mov	dph, (_floatToStr_integerPart_10001_52 + 1)
+      00013C 12r00r00         [24]  872 	lcall	__divsint
+      00013F 85 82*1A         [24]  873 	mov	_floatToStr_integerPart_10001_52,dpl
+      000142 85 83*1B         [24]  874 	mov	(_floatToStr_integerPart_10001_52 + 1),dph
+      000145 D0 05            [24]  875 	pop	ar5
+      000147 D0 06            [24]  876 	pop	ar6
+      000149 D0 07            [24]  877 	pop	ar7
+      00014B 80 A9            [24]  878 	sjmp	00105$
+      00014D                        879 00123$:
+      00014D 8D*1F            [24]  880 	mov	_floatToStr_sloc0_1_0,r5
+      00014F 8E*20            [24]  881 	mov	(_floatToStr_sloc0_1_0 + 1),r6
+                                    882 ;	tempAndHumidity.c:71: int end = i - 1;
+      000151 1D               [12]  883 	dec	r5
+      000152 BD FF 01         [24]  884 	cjne	r5,#0xff,00172$
+      000155 1E               [12]  885 	dec	r6
+      000156                        886 00172$:
+                                    887 ;	tempAndHumidity.c:72: while (start < end) 
+      000156 AB*21            [24]  888 	mov	r3,_floatToStr_sloc1_1_0
+      000158 AC*22            [24]  889 	mov	r4,(_floatToStr_sloc1_1_0 + 1)
+      00015A A9*1C            [24]  890 	mov	r1,_floatToStr_start_10002_54
+      00015C AA*1D            [24]  891 	mov	r2,(_floatToStr_start_10002_54 + 1)
+      00015E                        892 00108$:
+      00015E C3               [12]  893 	clr	c
+      00015F E9               [12]  894 	mov	a,r1
+      000160 9D               [12]  895 	subb	a,r5
+      000161 EA               [12]  896 	mov	a,r2
+      000162 64 80            [12]  897 	xrl	a,#0x80
+      000164 8E F0            [24]  898 	mov	b,r6
+      000166 63 F0 80         [24]  899 	xrl	b,#0x80
+      000169 95 F0            [12]  900 	subb	a,b
+      00016B 50 40            [24]  901 	jnc	00113$
+                                    902 ;	tempAndHumidity.c:74: char temp = str[start];
+      00016D C0 07            [24]  903 	push	ar7
+      00016F E9               [12]  904 	mov	a,r1
+      000170 2B               [12]  905 	add	a, r3
+      000171 F5*21            [12]  906 	mov	_floatToStr_sloc1_1_0,a
+      000173 EA               [12]  907 	mov	a,r2
+      000174 3C               [12]  908 	addc	a, r4
+      000175 F5*22            [12]  909 	mov	(_floatToStr_sloc1_1_0 + 1),a
+      000177 85*21 82         [24]  910 	mov	dpl,_floatToStr_sloc1_1_0
+      00017A 85*22 83         [24]  911 	mov	dph,(_floatToStr_sloc1_1_0 + 1)
+      00017D E0               [24]  912 	movx	a,@dptr
+      00017E F5*1E            [12]  913 	mov	_floatToStr_temp_30003_59,a
+                                    914 ;	tempAndHumidity.c:75: str[start] = str[end];
+      000180 ED               [12]  915 	mov	a,r5
+      000181 2B               [12]  916 	add	a, r3
+      000182 F5*23            [12]  917 	mov	_floatToStr_sloc2_1_0,a
+      000184 EE               [12]  918 	mov	a,r6
+      000185 3C               [12]  919 	addc	a, r4
+      000186 F5*24            [12]  920 	mov	(_floatToStr_sloc2_1_0 + 1),a
+      000188 85*23 82         [24]  921 	mov	dpl,_floatToStr_sloc2_1_0
+      00018B 85*24 83         [24]  922 	mov	dph,(_floatToStr_sloc2_1_0 + 1)
+      00018E E0               [24]  923 	movx	a,@dptr
+      00018F 85*21 82         [24]  924 	mov	dpl,_floatToStr_sloc1_1_0
+      000192 85*22 83         [24]  925 	mov	dph,(_floatToStr_sloc1_1_0 + 1)
+      000195 F0               [24]  926 	movx	@dptr,a
+                                    927 ;	tempAndHumidity.c:76: str[end] = temp;
+      000196 85*23 82         [24]  928 	mov	dpl,_floatToStr_sloc2_1_0
+      000199 85*24 83         [24]  929 	mov	dph,(_floatToStr_sloc2_1_0 + 1)
+      00019C E5*1E            [12]  930 	mov	a,_floatToStr_temp_30003_59
+      00019E F0               [24]  931 	movx	@dptr,a
+                                    932 ;	tempAndHumidity.c:77: start++;
+      00019F 09               [12]  933 	inc	r1
+      0001A0 B9 00 01         [24]  934 	cjne	r1,#0x00,00174$
+      0001A3 0A               [12]  935 	inc	r2
+      0001A4                        936 00174$:
+                                    937 ;	tempAndHumidity.c:78: end--;
+      0001A4 1D               [12]  938 	dec	r5
+      0001A5 BD FF 01         [24]  939 	cjne	r5,#0xff,00175$
+      0001A8 1E               [12]  940 	dec	r6
+      0001A9                        941 00175$:
+      0001A9 D0 07            [24]  942 	pop	ar7
+      0001AB 80 B1            [24]  943 	sjmp	00108$
+      0001AD                        944 00113$:
+                                    945 ;	tempAndHumidity.c:82: str[i++] = '.';
+      0001AD 74 01            [12]  946 	mov	a,#0x01
+      0001AF 25*1F            [12]  947 	add	a, _floatToStr_sloc0_1_0
+      0001B1 FD               [12]  948 	mov	r5,a
+      0001B2 E4               [12]  949 	clr	a
+      0001B3 35*20            [12]  950 	addc	a, (_floatToStr_sloc0_1_0 + 1)
+      0001B5 FE               [12]  951 	mov	r6,a
+      0001B6 90r00r00         [24]  952 	mov	dptr,#_floatToStr_PARM_2
+      0001B9 E0               [24]  953 	movx	a,@dptr
+      0001BA FB               [12]  954 	mov	r3,a
+      0001BB A3               [24]  955 	inc	dptr
+      0001BC E0               [24]  956 	movx	a,@dptr
+      0001BD FC               [12]  957 	mov	r4,a
+      0001BE E5*1F            [12]  958 	mov	a,_floatToStr_sloc0_1_0
+      0001C0 2B               [12]  959 	add	a, r3
+      0001C1 F5 82            [12]  960 	mov	dpl,a
+      0001C3 E5*20            [12]  961 	mov	a,(_floatToStr_sloc0_1_0 + 1)
+      0001C5 3C               [12]  962 	addc	a, r4
+      0001C6 F5 83            [12]  963 	mov	dph,a
+      0001C8 74 2E            [12]  964 	mov	a,#0x2e
+      0001CA F0               [24]  965 	movx	@dptr,a
+                                    966 ;	tempAndHumidity.c:83: str[i++] = decimalPart + '0';
+      0001CB 74 01            [12]  967 	mov	a,#0x01
+      0001CD 2D               [12]  968 	add	a, r5
+      0001CE F9               [12]  969 	mov	r1,a
+      0001CF E4               [12]  970 	clr	a
+      0001D0 3E               [12]  971 	addc	a, r6
+      0001D1 FA               [12]  972 	mov	r2,a
+      0001D2 ED               [12]  973 	mov	a,r5
+      0001D3 2B               [12]  974 	add	a, r3
+      0001D4 F5 82            [12]  975 	mov	dpl,a
+      0001D6 EE               [12]  976 	mov	a,r6
+      0001D7 3C               [12]  977 	addc	a, r4
+      0001D8 F5 83            [12]  978 	mov	dph,a
+      0001DA 74 30            [12]  979 	mov	a,#0x30
+      0001DC 2F               [12]  980 	add	a, r7
+      0001DD F0               [24]  981 	movx	@dptr,a
+                                    982 ;	tempAndHumidity.c:85: str[i] = '\0';
+      0001DE E9               [12]  983 	mov	a,r1
+      0001DF 2B               [12]  984 	add	a, r3
+      0001E0 F5 82            [12]  985 	mov	dpl,a
+      0001E2 EA               [12]  986 	mov	a,r2
+      0001E3 3C               [12]  987 	addc	a, r4
+      0001E4 F5 83            [12]  988 	mov	dph,a
+      0001E6 E4               [12]  989 	clr	a
+      0001E7 F0               [24]  990 	movx	@dptr,a
+                                    991 ;	tempAndHumidity.c:86: }
+      0001E8 22               [24]  992 	ret
+                                    993 ;------------------------------------------------------------
+                                    994 ;Allocation info for local variables in function 'intToStr'
+                                    995 ;------------------------------------------------------------
+                                    996 ;str                       Allocated with name '_intToStr_PARM_2'
+                                    997 ;num                       Allocated to registers r6 r7 
+                                    998 ;i                         Allocated with name '_intToStr_i_10000_61'
+                                    999 ;isNegative                Allocated to registers 
+                                   1000 ;start                     Allocated with name '_intToStr_start_10001_63'
+                                   1001 ;end                       Allocated to registers 
+                                   1002 ;temp                      Allocated with name '_intToStr_temp_10001_63'
+                                   1003 ;sloc0                     Allocated with name '_intToStr_sloc0_1_0'
+                                   1004 ;------------------------------------------------------------
+                                   1005 ;	tempAndHumidity.c:89: void intToStr(int num, char str[]) 
+                                   1006 ;	-----------------------------------------
+                                   1007 ;	 function intToStr
+                                   1008 ;	-----------------------------------------
+      0001E9                       1009 _intToStr:
+      0001E9 AE 82            [24] 1010 	mov	r6, dpl
+      0001EB AF 83            [24] 1011 	mov	r7, dph
+                                   1012 ;	tempAndHumidity.c:94: do 
+      0001ED E4               [12] 1013 	clr	a
+      0001EE F5*28            [12] 1014 	mov	_intToStr_i_10000_61,a
+      0001F0 F5*29            [12] 1015 	mov	(_intToStr_i_10000_61 + 1),a
+      0001F2                       1016 00101$:
+                                   1017 ;	tempAndHumidity.c:96: str[i++] = num % 10 + '0'; 
+      0001F2 E5*28            [12] 1018 	mov	a,_intToStr_i_10000_61
+      0001F4 25*25            [12] 1019 	add	a, _intToStr_PARM_2
+      0001F6 F9               [12] 1020 	mov	r1,a
+      0001F7 E5*29            [12] 1021 	mov	a,(_intToStr_i_10000_61 + 1)
+      0001F9 35*26            [12] 1022 	addc	a, (_intToStr_PARM_2 + 1)
+      0001FB FA               [12] 1023 	mov	r2,a
+      0001FC AB*27            [24] 1024 	mov	r3,(_intToStr_PARM_2 + 2)
+      0001FE 05*28            [12] 1025 	inc	_intToStr_i_10000_61
+      000200 E4               [12] 1026 	clr	a
+      000201 B5*28 02         [24] 1027 	cjne	a,_intToStr_i_10000_61,00135$
+      000204 05*29            [12] 1028 	inc	(_intToStr_i_10000_61 + 1)
+      000206                       1029 00135$:
+      000206 75*00 0A         [24] 1030 	mov	__modsint_PARM_2,#0x0a
+      000209 75*01 00         [24] 1031 	mov	(__modsint_PARM_2 + 1),#0x00
+      00020C 8E 82            [24] 1032 	mov	dpl, r6
+      00020E 8F 83            [24] 1033 	mov	dph, r7
+      000210 C0 07            [24] 1034 	push	ar7
+      000212 C0 06            [24] 1035 	push	ar6
+      000214 C0 03            [24] 1036 	push	ar3
+      000216 C0 02            [24] 1037 	push	ar2
+      000218 C0 01            [24] 1038 	push	ar1
+      00021A 12r00r00         [24] 1039 	lcall	__modsint
+      00021D A8 82            [24] 1040 	mov	r0, dpl
+      00021F D0 01            [24] 1041 	pop	ar1
+      000221 D0 02            [24] 1042 	pop	ar2
+      000223 D0 03            [24] 1043 	pop	ar3
+      000225 D0 06            [24] 1044 	pop	ar6
+      000227 D0 07            [24] 1045 	pop	ar7
+      000229 74 30            [12] 1046 	mov	a,#0x30
+      00022B 28               [12] 1047 	add	a, r0
+      00022C 89 82            [24] 1048 	mov	dpl,r1
+      00022E 8A 83            [24] 1049 	mov	dph,r2
+      000230 8B F0            [24] 1050 	mov	b,r3
+      000232 12r00r00         [24] 1051 	lcall	__gptrput
+                                   1052 ;	tempAndHumidity.c:97: num /= 10;
+      000235 75*00 0A         [24] 1053 	mov	__divsint_PARM_2,#0x0a
+      000238 75*01 00         [24] 1054 	mov	(__divsint_PARM_2 + 1),#0x00
+                                   1055 ;	tempAndHumidity.c:98: }while (num != 0);
+      00023B 8E 82            [24] 1056 	mov	dpl, r6
+      00023D 8F 83            [24] 1057 	mov	dph, r7
+      00023F 12r00r00         [24] 1058 	lcall	__divsint
+      000242 AE 82            [24] 1059 	mov	r6, dpl
+      000244 AF 83            [24] 1060 	mov	r7, dph
+      000246 EE               [12] 1061 	mov	a,r6
+      000247 4F               [12] 1062 	orl	a,r7
+      000248 70 A8            [24] 1063 	jnz	00101$
+                                   1064 ;	tempAndHumidity.c:100: str[i] = '\0'; 
+      00024A E5*28            [12] 1065 	mov	a,_intToStr_i_10000_61
+      00024C 25*25            [12] 1066 	add	a, _intToStr_PARM_2
+      00024E FD               [12] 1067 	mov	r5,a
+      00024F E5*29            [12] 1068 	mov	a,(_intToStr_i_10000_61 + 1)
+      000251 35*26            [12] 1069 	addc	a, (_intToStr_PARM_2 + 1)
+      000253 FE               [12] 1070 	mov	r6,a
+      000254 AF*27            [24] 1071 	mov	r7,(_intToStr_PARM_2 + 2)
+      000256 8D 82            [24] 1072 	mov	dpl,r5
+      000258 8E 83            [24] 1073 	mov	dph,r6
+      00025A 8F F0            [24] 1074 	mov	b,r7
+      00025C E4               [12] 1075 	clr	a
+      00025D 12r00r00         [24] 1076 	lcall	__gptrput
+                                   1077 ;	tempAndHumidity.c:103: int end = i - 1;
+      000260 E5*28            [12] 1078 	mov	a,_intToStr_i_10000_61
+      000262 24 FF            [12] 1079 	add	a,#0xff
+      000264 FE               [12] 1080 	mov	r6,a
+      000265 E5*29            [12] 1081 	mov	a,(_intToStr_i_10000_61 + 1)
+      000267 34 FF            [12] 1082 	addc	a,#0xff
+      000269 FF               [12] 1083 	mov	r7,a
+                                   1084 ;	tempAndHumidity.c:105: while (start < end) {
+      00026A E4               [12] 1085 	clr	a
+      00026B F5*2A            [12] 1086 	mov	_intToStr_start_10001_63,a
+      00026D F5*2B            [12] 1087 	mov	(_intToStr_start_10001_63 + 1),a
+      00026F                       1088 00104$:
+      00026F C3               [12] 1089 	clr	c
+      000270 E5*2A            [12] 1090 	mov	a,_intToStr_start_10001_63
+      000272 9E               [12] 1091 	subb	a,r6
+      000273 E5*2B            [12] 1092 	mov	a,(_intToStr_start_10001_63 + 1)
+      000275 64 80            [12] 1093 	xrl	a,#0x80
+      000277 8F F0            [24] 1094 	mov	b,r7
+      000279 63 F0 80         [24] 1095 	xrl	b,#0x80
+      00027C 95 F0            [12] 1096 	subb	a,b
+      00027E 50 56            [24] 1097 	jnc	00107$
+                                   1098 ;	tempAndHumidity.c:106: temp = str[start];
+      000280 E5*2A            [12] 1099 	mov	a,_intToStr_start_10001_63
+      000282 25*25            [12] 1100 	add	a, _intToStr_PARM_2
+      000284 F9               [12] 1101 	mov	r1,a
+      000285 E5*2B            [12] 1102 	mov	a,(_intToStr_start_10001_63 + 1)
+      000287 35*26            [12] 1103 	addc	a, (_intToStr_PARM_2 + 1)
+      000289 FA               [12] 1104 	mov	r2,a
+      00028A AB*27            [24] 1105 	mov	r3,(_intToStr_PARM_2 + 2)
+      00028C 89 82            [24] 1106 	mov	dpl,r1
+      00028E 8A 83            [24] 1107 	mov	dph,r2
+      000290 8B F0            [24] 1108 	mov	b,r3
+      000292 12r00r00         [24] 1109 	lcall	__gptrget
+      000295 F5*2C            [12] 1110 	mov	_intToStr_temp_10001_63,a
+                                   1111 ;	tempAndHumidity.c:107: str[start] = str[end];
+      000297 EE               [12] 1112 	mov	a,r6
+      000298 25*25            [12] 1113 	add	a, _intToStr_PARM_2
+      00029A F5*2D            [12] 1114 	mov	_intToStr_sloc0_1_0,a
+      00029C EF               [12] 1115 	mov	a,r7
+      00029D 35*26            [12] 1116 	addc	a, (_intToStr_PARM_2 + 1)
+      00029F F5*2E            [12] 1117 	mov	(_intToStr_sloc0_1_0 + 1),a
+      0002A1 85*27*2F         [24] 1118 	mov	(_intToStr_sloc0_1_0 + 2),(_intToStr_PARM_2 + 2)
+      0002A4 85*2D 82         [24] 1119 	mov	dpl,_intToStr_sloc0_1_0
+      0002A7 85*2E 83         [24] 1120 	mov	dph,(_intToStr_sloc0_1_0 + 1)
+      0002AA 85*2F F0         [24] 1121 	mov	b,(_intToStr_sloc0_1_0 + 2)
+      0002AD 12r00r00         [24] 1122 	lcall	__gptrget
+      0002B0 89 82            [24] 1123 	mov	dpl,r1
+      0002B2 8A 83            [24] 1124 	mov	dph,r2
+      0002B4 8B F0            [24] 1125 	mov	b,r3
+      0002B6 12r00r00         [24] 1126 	lcall	__gptrput
+                                   1127 ;	tempAndHumidity.c:108: str[end] = temp;
+      0002B9 85*2D 82         [24] 1128 	mov	dpl,_intToStr_sloc0_1_0
+      0002BC 85*2E 83         [24] 1129 	mov	dph,(_intToStr_sloc0_1_0 + 1)
+      0002BF 85*2F F0         [24] 1130 	mov	b,(_intToStr_sloc0_1_0 + 2)
+      0002C2 E5*2C            [12] 1131 	mov	a,_intToStr_temp_10001_63
+      0002C4 12r00r00         [24] 1132 	lcall	__gptrput
+                                   1133 ;	tempAndHumidity.c:109: start++;
+      0002C7 05*2A            [12] 1134 	inc	_intToStr_start_10001_63
+      0002C9 E4               [12] 1135 	clr	a
+      0002CA B5*2A 02         [24] 1136 	cjne	a,_intToStr_start_10001_63,00138$
+      0002CD 05*2B            [12] 1137 	inc	(_intToStr_start_10001_63 + 1)
+      0002CF                       1138 00138$:
+                                   1139 ;	tempAndHumidity.c:110: end--;
+      0002CF 1E               [12] 1140 	dec	r6
+      0002D0 BE FF 01         [24] 1141 	cjne	r6,#0xff,00139$
+      0002D3 1F               [12] 1142 	dec	r7
+      0002D4                       1143 00139$:
+      0002D4 80 99            [24] 1144 	sjmp	00104$
+      0002D6                       1145 00107$:
+                                   1146 ;	tempAndHumidity.c:112: }
+      0002D6 22               [24] 1147 	ret
+                                   1148 ;------------------------------------------------------------
+                                   1149 ;Allocation info for local variables in function 'delay_us'
+                                   1150 ;------------------------------------------------------------
+                                   1151 ;us                        Allocated to registers 
+                                   1152 ;------------------------------------------------------------
+                                   1153 ;	tempAndHumidity.c:114: void delay_us(unsigned int us) {
+                                   1154 ;	-----------------------------------------
+                                   1155 ;	 function delay_us
+                                   1156 ;	-----------------------------------------
+      0002D7                       1157 _delay_us:
+      0002D7 AE 82            [24] 1158 	mov	r6, dpl
+      0002D9 AF 83            [24] 1159 	mov	r7, dph
+                                   1160 ;	tempAndHumidity.c:115: while (us--);
+      0002DB                       1161 00101$:
+      0002DB 8E 04            [24] 1162 	mov	ar4,r6
+      0002DD 8F 05            [24] 1163 	mov	ar5,r7
+      0002DF 1E               [12] 1164 	dec	r6
+      0002E0 BE FF 01         [24] 1165 	cjne	r6,#0xff,00113$
+      0002E3 1F               [12] 1166 	dec	r7
+      0002E4                       1167 00113$:
+      0002E4 EC               [12] 1168 	mov	a,r4
+      0002E5 4D               [12] 1169 	orl	a,r5
+      0002E6 70 F3            [24] 1170 	jnz	00101$
+                                   1171 ;	tempAndHumidity.c:116: }
+      0002E8 22               [24] 1172 	ret
+                                   1173 ;------------------------------------------------------------
+                                   1174 ;Allocation info for local variables in function 'delay_ms'
+                                   1175 ;------------------------------------------------------------
+                                   1176 ;ms                        Allocated to registers r6 r7 
+                                   1177 ;i                         Allocated to registers r4 r5 
+                                   1178 ;------------------------------------------------------------
+                                   1179 ;	tempAndHumidity.c:118: void delay_ms(unsigned int ms) {
+                                   1180 ;	-----------------------------------------
+                                   1181 ;	 function delay_ms
+                                   1182 ;	-----------------------------------------
+      0002E9                       1183 _delay_ms:
+      0002E9 AE 82            [24] 1184 	mov	r6, dpl
+      0002EB AF 83            [24] 1185 	mov	r7, dph
+                                   1186 ;	tempAndHumidity.c:120: for (i = 0; i < ms; i++) {
+      0002ED 7C 00            [12] 1187 	mov	r4,#0x00
+      0002EF 7D 00            [12] 1188 	mov	r5,#0x00
+      0002F1                       1189 00103$:
+      0002F1 C3               [12] 1190 	clr	c
+      0002F2 EC               [12] 1191 	mov	a,r4
+      0002F3 9E               [12] 1192 	subb	a,r6
+      0002F4 ED               [12] 1193 	mov	a,r5
+      0002F5 9F               [12] 1194 	subb	a,r7
+      0002F6 50 1D            [24] 1195 	jnc	00105$
+                                   1196 ;	tempAndHumidity.c:121: delay_us(1000);
+      0002F8 90 03 E8         [24] 1197 	mov	dptr,#0x03e8
+      0002FB C0 07            [24] 1198 	push	ar7
+      0002FD C0 06            [24] 1199 	push	ar6
+      0002FF C0 05            [24] 1200 	push	ar5
+      000301 C0 04            [24] 1201 	push	ar4
+      000303 12r02rD7         [24] 1202 	lcall	_delay_us
+      000306 D0 04            [24] 1203 	pop	ar4
+      000308 D0 05            [24] 1204 	pop	ar5
+      00030A D0 06            [24] 1205 	pop	ar6
+      00030C D0 07            [24] 1206 	pop	ar7
+                                   1207 ;	tempAndHumidity.c:120: for (i = 0; i < ms; i++) {
+      00030E 0C               [12] 1208 	inc	r4
+      00030F BC 00 DF         [24] 1209 	cjne	r4,#0x00,00103$
+      000312 0D               [12] 1210 	inc	r5
+      000313 80 DC            [24] 1211 	sjmp	00103$
+      000315                       1212 00105$:
+                                   1213 ;	tempAndHumidity.c:123: }
+      000315 22               [24] 1214 	ret
+                                   1215 ;------------------------------------------------------------
+                                   1216 ;Allocation info for local variables in function 'INT0_ISR'
+                                   1217 ;------------------------------------------------------------
+                                   1218 ;	tempAndHumidity.c:125: void INT0_ISR(void) __interrupt (0)
+                                   1219 ;	-----------------------------------------
+                                   1220 ;	 function INT0_ISR
+                                   1221 ;	-----------------------------------------
+      000316                       1222 _INT0_ISR:
+      000316 C0 E0            [24] 1223 	push	acc
+                                   1224 ;	tempAndHumidity.c:127: if(comfimed==0)
+      000318 E5*12            [12] 1225 	mov	a,_comfimed
+      00031A 45*13            [12] 1226 	orl	a,(_comfimed + 1)
+                                   1227 ;	tempAndHumidity.c:129: justPressed = true;
+                                   1228 ;	tempAndHumidity.c:130: comfimed = 200;
+      00031C 70 08            [24] 1229 	jnz	00103$
+      00031E 75*11 01         [24] 1230 	mov	_justPressed,#0x01
+      000321 75*12 C8         [24] 1231 	mov	_comfimed,#0xc8
+      000324 F5*13            [12] 1232 	mov	(_comfimed + 1),a
+      000326                       1233 00103$:
+                                   1234 ;	tempAndHumidity.c:132: }
+      000326 D0 E0            [24] 1235 	pop	acc
+      000328 32               [24] 1236 	reti
+                                   1237 ;	eliminated unneeded mov psw,# (no regs used in bank)
+                                   1238 ;	eliminated unneeded push/pop not_psw
+                                   1239 ;	eliminated unneeded push/pop dpl
+                                   1240 ;	eliminated unneeded push/pop dph
+                                   1241 ;	eliminated unneeded push/pop b
+                                   1242 ;------------------------------------------------------------
+                                   1243 ;Allocation info for local variables in function 'display_number'
+                                   1244 ;------------------------------------------------------------
+                                   1245 ;digit                     Allocated with name '_display_number_PARM_2'
+                                   1246 ;num                       Allocated to registers r7 
+                                   1247 ;------------------------------------------------------------
+                                   1248 ;	tempAndHumidity.c:134: void display_number(unsigned char num, unsigned char digit) 
+                                   1249 ;	-----------------------------------------
+                                   1250 ;	 function display_number
+                                   1251 ;	-----------------------------------------
+      000329                       1252 _display_number:
+      000329 AF 82            [24] 1253 	mov	r7, dpl
+                                   1254 ;	tempAndHumidity.c:136: DIG1 = 1;
+                                   1255 ;	assignBit
+      00032B D2 A0            [12] 1256 	setb	_P20
+                                   1257 ;	tempAndHumidity.c:137: DIG2 = 1;
+                                   1258 ;	assignBit
+      00032D D2 A1            [12] 1259 	setb	_P21
+                                   1260 ;	tempAndHumidity.c:138: DIG3 = 1;
+                                   1261 ;	assignBit
+      00032F D2 A2            [12] 1262 	setb	_P22
+                                   1263 ;	tempAndHumidity.c:139: DIG4 = 1;
+                                   1264 ;	assignBit
+      000331 D2 A3            [12] 1265 	setb	_P23
+                                   1266 ;	tempAndHumidity.c:141: if(digit == 1) DIG1 = 0;
+      000333 74 01            [12] 1267 	mov	a,#0x01
+      000335 B5*30 02         [24] 1268 	cjne	a,_display_number_PARM_2,00102$
+                                   1269 ;	assignBit
+      000338 C2 A0            [12] 1270 	clr	_P20
+      00033A                       1271 00102$:
+                                   1272 ;	tempAndHumidity.c:142: if(digit == 2) DIG2 = 0;
+      00033A 74 02            [12] 1273 	mov	a,#0x02
+      00033C B5*30 02         [24] 1274 	cjne	a,_display_number_PARM_2,00104$
+                                   1275 ;	assignBit
+      00033F C2 A1            [12] 1276 	clr	_P21
+      000341                       1277 00104$:
+                                   1278 ;	tempAndHumidity.c:143: if(digit == 3) DIG3 = 0;
+      000341 74 03            [12] 1279 	mov	a,#0x03
+      000343 B5*30 04         [24] 1280 	cjne	a,_display_number_PARM_2,00148$
+      000346 74 01            [12] 1281 	mov	a,#0x01
+      000348 80 01            [24] 1282 	sjmp	00149$
+      00034A                       1283 00148$:
+      00034A E4               [12] 1284 	clr	a
+      00034B                       1285 00149$:
+      00034B FE               [12] 1286 	mov	r6,a
+      00034C 60 02            [24] 1287 	jz	00106$
+                                   1288 ;	assignBit
+      00034E C2 A2            [12] 1289 	clr	_P22
+      000350                       1290 00106$:
+                                   1291 ;	tempAndHumidity.c:144: if(digit == 4) DIG4 = 0;
+      000350 74 04            [12] 1292 	mov	a,#0x04
+      000352 B5*30 02         [24] 1293 	cjne	a,_display_number_PARM_2,00108$
+                                   1294 ;	assignBit
+      000355 C2 A3            [12] 1295 	clr	_P23
+      000357                       1296 00108$:
+                                   1297 ;	tempAndHumidity.c:146: SEG_A = (seg_code[num] ) & 0x01;
+      000357 EF               [12] 1298 	mov	a,r7
+      000358 24r00            [12] 1299 	add	a, #_seg_code
+      00035A F9               [12] 1300 	mov	r1,a
+      00035B E7               [12] 1301 	mov	a,@r1
+      00035C FF               [12] 1302 	mov	r7,a
+      00035D 54 01            [12] 1303 	anl	a,#0x01
+                                   1304 ;	assignBit
+      00035F 24 FF            [12] 1305 	add	a,#0xff
+      000361 92 90            [24] 1306 	mov	_P10,c
+                                   1307 ;	tempAndHumidity.c:147: SEG_B = (seg_code[num] >> 1) & 0x01;
+      000363 EF               [12] 1308 	mov	a,r7
+      000364 03               [12] 1309 	rr	a
+      000365 54 01            [12] 1310 	anl	a,#0x01
+                                   1311 ;	assignBit
+      000367 24 FF            [12] 1312 	add	a,#0xff
+      000369 92 91            [24] 1313 	mov	_P11,c
+                                   1314 ;	tempAndHumidity.c:148: SEG_C = (seg_code[num] >> 2) & 0x01;
+      00036B EF               [12] 1315 	mov	a,r7
+      00036C 03               [12] 1316 	rr	a
+      00036D 03               [12] 1317 	rr	a
+      00036E 54 01            [12] 1318 	anl	a,#0x01
+                                   1319 ;	assignBit
+      000370 24 FF            [12] 1320 	add	a,#0xff
+      000372 92 92            [24] 1321 	mov	_P12,c
+                                   1322 ;	tempAndHumidity.c:149: SEG_D = (seg_code[num] >> 3) & 0x01;
+      000374 EF               [12] 1323 	mov	a,r7
+      000375 A2 E3            [12] 1324 	mov	c,acc.3
+      000377 E4               [12] 1325 	clr	a
+      000378 33               [12] 1326 	rlc	a
+                                   1327 ;	assignBit
+      000379 24 FF            [12] 1328 	add	a,#0xff
+      00037B 92 93            [24] 1329 	mov	_P13,c
+                                   1330 ;	tempAndHumidity.c:150: SEG_E = (seg_code[num] >> 4) & 0x01;
+      00037D EF               [12] 1331 	mov	a,r7
+      00037E C4               [12] 1332 	swap	a
+      00037F 54 01            [12] 1333 	anl	a,#0x01
+                                   1334 ;	assignBit
+      000381 24 FF            [12] 1335 	add	a,#0xff
+      000383 92 94            [24] 1336 	mov	_P14,c
+                                   1337 ;	tempAndHumidity.c:151: SEG_F = (seg_code[num] >> 5) & 0x01;
+      000385 EF               [12] 1338 	mov	a,r7
+      000386 A2 E5            [12] 1339 	mov	c,acc.5
+      000388 E4               [12] 1340 	clr	a
+      000389 33               [12] 1341 	rlc	a
+                                   1342 ;	assignBit
+      00038A 24 FF            [12] 1343 	add	a,#0xff
+      00038C 92 95            [24] 1344 	mov	_P15,c
+                                   1345 ;	tempAndHumidity.c:152: SEG_G = (seg_code[num] >> 6) & 0x01;
+      00038E EF               [12] 1346 	mov	a,r7
+      00038F 23               [12] 1347 	rl	a
+      000390 23               [12] 1348 	rl	a
+      000391 54 01            [12] 1349 	anl	a,#0x01
+                                   1350 ;	assignBit
+      000393 24 FF            [12] 1351 	add	a,#0xff
+      000395 92 96            [24] 1352 	mov	_P16,c
+                                   1353 ;	tempAndHumidity.c:153: if(digit == 3)
+      000397 EE               [12] 1354 	mov	a,r6
+      000398 60 04            [24] 1355 	jz	00110$
+                                   1356 ;	tempAndHumidity.c:155: SEG_DP = 1;
+                                   1357 ;	assignBit
+      00039A D2 97            [12] 1358 	setb	_P17
+      00039C 80 02            [24] 1359 	sjmp	00111$
+      00039E                       1360 00110$:
+                                   1361 ;	tempAndHumidity.c:159: SEG_DP = 0;
+                                   1362 ;	assignBit
+      00039E C2 97            [12] 1363 	clr	_P17
+      0003A0                       1364 00111$:
+                                   1365 ;	tempAndHumidity.c:162: delay_us(1000);
+      0003A0 90 03 E8         [24] 1366 	mov	dptr,#0x03e8
+      0003A3 12r02rD7         [24] 1367 	lcall	_delay_us
+                                   1368 ;	tempAndHumidity.c:164: DIG1 = 1;
+                                   1369 ;	assignBit
+      0003A6 D2 A0            [12] 1370 	setb	_P20
+                                   1371 ;	tempAndHumidity.c:165: DIG2 = 1;
+                                   1372 ;	assignBit
+      0003A8 D2 A1            [12] 1373 	setb	_P21
+                                   1374 ;	tempAndHumidity.c:166: DIG3 = 1;
+                                   1375 ;	assignBit
+      0003AA D2 A2            [12] 1376 	setb	_P22
+                                   1377 ;	tempAndHumidity.c:167: DIG4 = 1;
+                                   1378 ;	assignBit
+      0003AC D2 A3            [12] 1379 	setb	_P23
+                                   1380 ;	tempAndHumidity.c:168: }
+      0003AE 22               [24] 1381 	ret
+                                   1382 ;------------------------------------------------------------
+                                   1383 ;Allocation info for local variables in function 'DHT22_init'
+                                   1384 ;------------------------------------------------------------
+                                   1385 ;	tempAndHumidity.c:170: void DHT22_init(void) {
+                                   1386 ;	-----------------------------------------
+                                   1387 ;	 function DHT22_init
+                                   1388 ;	-----------------------------------------
+      0003AF                       1389 _DHT22_init:
+                                   1390 ;	tempAndHumidity.c:171: DHT22_PIN = 1;
+                                   1391 ;	assignBit
+      0003AF D2 B7            [12] 1392 	setb	_P37
+                                   1393 ;	tempAndHumidity.c:172: }
+      0003B1 22               [24] 1394 	ret
+                                   1395 ;------------------------------------------------------------
+                                   1396 ;Allocation info for local variables in function 'DHT22_read'
+                                   1397 ;------------------------------------------------------------
+                                   1398 ;i                         Allocated to registers r6 
+                                   1399 ;j                         Allocated to registers r7 
+                                   1400 ;------------------------------------------------------------
+                                   1401 ;	tempAndHumidity.c:174: unsigned char DHT22_read(void) {
+                                   1402 ;	-----------------------------------------
+                                   1403 ;	 function DHT22_read
+                                   1404 ;	-----------------------------------------
+      0003B2                       1405 _DHT22_read:
+                                   1406 ;	tempAndHumidity.c:177: DHT22_PIN = 0; 
+                                   1407 ;	assignBit
+      0003B2 C2 B7            [12] 1408 	clr	_P37
+                                   1409 ;	tempAndHumidity.c:178: delay_ms(18);  
+      0003B4 90 00 12         [24] 1410 	mov	dptr,#0x0012
+      0003B7 12r02rE9         [24] 1411 	lcall	_delay_ms
+                                   1412 ;	tempAndHumidity.c:179: DHT22_PIN = 1; 
+                                   1413 ;	assignBit
+      0003BA D2 B7            [12] 1414 	setb	_P37
+                                   1415 ;	tempAndHumidity.c:180: delay_us(30); 
+      0003BC 90 00 1E         [24] 1416 	mov	dptr,#0x001e
+      0003BF 12r02rD7         [24] 1417 	lcall	_delay_us
+                                   1418 ;	tempAndHumidity.c:182: while (DHT22_PIN); 
+      0003C2                       1419 00101$:
+      0003C2 20 B7 FD         [24] 1420 	jb	_P37,00101$
+                                   1421 ;	tempAndHumidity.c:183: while (!DHT22_PIN);
+      0003C5                       1422 00104$:
+      0003C5 30 B7 FD         [24] 1423 	jnb	_P37,00104$
+                                   1424 ;	tempAndHumidity.c:184: while (DHT22_PIN);
+      0003C8                       1425 00107$:
+      0003C8 20 B7 FD         [24] 1426 	jb	_P37,00107$
+                                   1427 ;	tempAndHumidity.c:186: for (j = 0; j < 5; j++)
+      0003CB 7F 00            [12] 1428 	mov	r7,#0x00
+      0003CD                       1429 00124$:
+                                   1430 ;	tempAndHumidity.c:188: data[j] = 0;
+      0003CD EF               [12] 1431 	mov	a,r7
+      0003CE 24r0B            [12] 1432 	add	a, #_data
+      0003D0 F8               [12] 1433 	mov	r0,a
+      0003D1 76 00            [12] 1434 	mov	@r0,#0x00
+                                   1435 ;	tempAndHumidity.c:191: while (!DHT22_PIN);
+      0003D3 7E 00            [12] 1436 	mov	r6,#0x00
+      0003D5                       1437 00110$:
+      0003D5 30 B7 FD         [24] 1438 	jnb	_P37,00110$
+                                   1439 ;	tempAndHumidity.c:192: delay_us(40);
+      0003D8 90 00 28         [24] 1440 	mov	dptr,#0x0028
+      0003DB C0 07            [24] 1441 	push	ar7
+      0003DD C0 06            [24] 1442 	push	ar6
+      0003DF 12r02rD7         [24] 1443 	lcall	_delay_us
+      0003E2 D0 06            [24] 1444 	pop	ar6
+      0003E4 D0 07            [24] 1445 	pop	ar7
+                                   1446 ;	tempAndHumidity.c:193: if (DHT22_PIN) {
+      0003E6 30 B7 1B         [24] 1447 	jnb	_P37,00115$
+                                   1448 ;	tempAndHumidity.c:194: data[j] |= (1 << (7 - i));
+      0003E9 EF               [12] 1449 	mov	a,r7
+      0003EA 24r0B            [12] 1450 	add	a, #_data
+      0003EC F9               [12] 1451 	mov	r1,a
+      0003ED 87 05            [24] 1452 	mov	ar5,@r1
+      0003EF 8E 04            [24] 1453 	mov	ar4,r6
+      0003F1 74 07            [12] 1454 	mov	a,#0x07
+      0003F3 C3               [12] 1455 	clr	c
+      0003F4 9C               [12] 1456 	subb	a,r4
+      0003F5 F5 F0            [12] 1457 	mov	b,a
+      0003F7 05 F0            [12] 1458 	inc	b
+      0003F9 74 01            [12] 1459 	mov	a,#0x01
+      0003FB 80 02            [24] 1460 	sjmp	00214$
+      0003FD                       1461 00213$:
+      0003FD 25 E0            [12] 1462 	add	a,acc
+      0003FF                       1463 00214$:
+      0003FF D5 F0 FB         [24] 1464 	djnz	b,00213$
+      000402 4D               [12] 1465 	orl	a,r5
+      000403 F7               [12] 1466 	mov	@r1,a
+                                   1467 ;	tempAndHumidity.c:196: while (DHT22_PIN);
+      000404                       1468 00115$:
+      000404 20 B7 FD         [24] 1469 	jb	_P37,00115$
+                                   1470 ;	tempAndHumidity.c:189: for (i = 0; i < 8; i++)
+      000407 0E               [12] 1471 	inc	r6
+      000408 BE 08 00         [24] 1472 	cjne	r6,#0x08,00216$
+      00040B                       1473 00216$:
+      00040B 40 C8            [24] 1474 	jc	00110$
+                                   1475 ;	tempAndHumidity.c:186: for (j = 0; j < 5; j++)
+      00040D 0F               [12] 1476 	inc	r7
+      00040E BF 05 00         [24] 1477 	cjne	r7,#0x05,00218$
+      000411                       1478 00218$:
+      000411 40 BA            [24] 1479 	jc	00124$
+                                   1480 ;	tempAndHumidity.c:200: if ((data[0] + data[1] + data[2] + data[3]) != data[4]) 
+      000413 AE*0B            [24] 1481 	mov	r6,_data
+      000415 7F 00            [12] 1482 	mov	r7,#0x00
+      000417 AC*0C            [24] 1483 	mov	r4,(_data + 0x0001)
+      000419 7D 00            [12] 1484 	mov	r5,#0x00
+      00041B EC               [12] 1485 	mov	a,r4
+      00041C 2E               [12] 1486 	add	a, r6
+      00041D FE               [12] 1487 	mov	r6,a
+      00041E ED               [12] 1488 	mov	a,r5
+      00041F 3F               [12] 1489 	addc	a, r7
+      000420 FF               [12] 1490 	mov	r7,a
+      000421 E5*0D            [12] 1491 	mov	a,(_data + 0x0002)
+      000423 2E               [12] 1492 	add	a, r6
+      000424 FE               [12] 1493 	mov	r6,a
+      000425 ED               [12] 1494 	mov	a,r5
+      000426 3F               [12] 1495 	addc	a, r7
+      000427 FF               [12] 1496 	mov	r7,a
+      000428 E5*0E            [12] 1497 	mov	a,(_data + 0x0003)
+      00042A 2E               [12] 1498 	add	a, r6
+      00042B FE               [12] 1499 	mov	r6,a
+      00042C ED               [12] 1500 	mov	a,r5
+      00042D 3F               [12] 1501 	addc	a, r7
+      00042E FF               [12] 1502 	mov	r7,a
+      00042F AC*0F            [24] 1503 	mov	r4,(_data + 0x0004)
+      000431 EE               [12] 1504 	mov	a,r6
+      000432 B5 04 06         [24] 1505 	cjne	a,ar4,00220$
+      000435 EF               [12] 1506 	mov	a,r7
+      000436 B5 05 02         [24] 1507 	cjne	a,ar5,00220$
+      000439 80 04            [24] 1508 	sjmp	00121$
+      00043B                       1509 00220$:
+                                   1510 ;	tempAndHumidity.c:202: return 1;
+      00043B 75 82 01         [24] 1511 	mov	dpl, #0x01
+      00043E 22               [24] 1512 	ret
+      00043F                       1513 00121$:
+                                   1514 ;	tempAndHumidity.c:204: return 0;
+      00043F 75 82 00         [24] 1515 	mov	dpl, #0x00
+                                   1516 ;	tempAndHumidity.c:205: }
+      000442 22               [24] 1517 	ret
+                                   1518 ;------------------------------------------------------------
+                                   1519 ;Allocation info for local variables in function 'UART_SendByte'
+                                   1520 ;------------------------------------------------------------
+                                   1521 ;dat                       Allocated to registers 
+                                   1522 ;------------------------------------------------------------
+                                   1523 ;	tempAndHumidity.c:207: void UART_SendByte(char dat) {
+                                   1524 ;	-----------------------------------------
+                                   1525 ;	 function UART_SendByte
+                                   1526 ;	-----------------------------------------
+      000443                       1527 _UART_SendByte:
+      000443 85 82 99         [24] 1528 	mov	_SBUF,dpl
+                                   1529 ;	tempAndHumidity.c:209: while (!TI);
+      000446                       1530 00101$:
+                                   1531 ;	tempAndHumidity.c:210: TI=0;     
+                                   1532 ;	assignBit
+      000446 10 99 02         [24] 1533 	jbc	_TI,00118$
+      000449 80 FB            [24] 1534 	sjmp	00101$
+      00044B                       1535 00118$:
+                                   1536 ;	tempAndHumidity.c:211: }
+      00044B 22               [24] 1537 	ret
+                                   1538 ;------------------------------------------------------------
+                                   1539 ;Allocation info for local variables in function 'UART_SendString'
+                                   1540 ;------------------------------------------------------------
+                                   1541 ;str                       Allocated to registers 
+                                   1542 ;------------------------------------------------------------
+                                   1543 ;	tempAndHumidity.c:213: void UART_SendString(char* str) {
+                                   1544 ;	-----------------------------------------
+                                   1545 ;	 function UART_SendString
+                                   1546 ;	-----------------------------------------
+      00044C                       1547 _UART_SendString:
+      00044C AD 82            [24] 1548 	mov	r5, dpl
+      00044E AE 83            [24] 1549 	mov	r6, dph
+      000450 AF F0            [24] 1550 	mov	r7, b
+                                   1551 ;	tempAndHumidity.c:214: while (*str) {
+      000452                       1552 00101$:
+      000452 8D 82            [24] 1553 	mov	dpl,r5
+      000454 8E 83            [24] 1554 	mov	dph,r6
+      000456 8F F0            [24] 1555 	mov	b,r7
+      000458 12r00r00         [24] 1556 	lcall	__gptrget
+      00045B FC               [12] 1557 	mov	r4,a
+      00045C 60 18            [24] 1558 	jz	00104$
+                                   1559 ;	tempAndHumidity.c:215: UART_SendByte(*str++); 
+      00045E 8C 82            [24] 1560 	mov	dpl,r4
+      000460 0D               [12] 1561 	inc	r5
+      000461 BD 00 01         [24] 1562 	cjne	r5,#0x00,00120$
+      000464 0E               [12] 1563 	inc	r6
+      000465                       1564 00120$:
+      000465 C0 07            [24] 1565 	push	ar7
+      000467 C0 06            [24] 1566 	push	ar6
+      000469 C0 05            [24] 1567 	push	ar5
+      00046B 12r04r43         [24] 1568 	lcall	_UART_SendByte
+      00046E D0 05            [24] 1569 	pop	ar5
+      000470 D0 06            [24] 1570 	pop	ar6
+      000472 D0 07            [24] 1571 	pop	ar7
+      000474 80 DC            [24] 1572 	sjmp	00101$
+      000476                       1573 00104$:
+                                   1574 ;	tempAndHumidity.c:218: }
+      000476 22               [24] 1575 	ret
+                                   1576 ;------------------------------------------------------------
+                                   1577 ;Allocation info for local variables in function 'Uart1_Init'
+                                   1578 ;------------------------------------------------------------
+                                   1579 ;	tempAndHumidity.c:220: void Uart1_Init(void)	//115200bps@12.000MHz
+                                   1580 ;	-----------------------------------------
+                                   1581 ;	 function Uart1_Init
+                                   1582 ;	-----------------------------------------
+      000477                       1583 _Uart1_Init:
+                                   1584 ;	tempAndHumidity.c:222: SCON = 0x50;		
+      000477 75 98 50         [24] 1585 	mov	_SCON,#0x50
+                                   1586 ;	tempAndHumidity.c:223: AUXR |= 0x01;		
+      00047A 43 8E 01         [24] 1587 	orl	_AUXR,#0x01
+                                   1588 ;	tempAndHumidity.c:224: AUXR |= 0x04;		
+      00047D 43 8E 04         [24] 1589 	orl	_AUXR,#0x04
+                                   1590 ;	tempAndHumidity.c:225: T2L = 0xE6;			
+      000480 75 D7 E6         [24] 1591 	mov	_T2L,#0xe6
+                                   1592 ;	tempAndHumidity.c:226: T2H = 0xFF;			
+      000483 75 D6 FF         [24] 1593 	mov	_T2H,#0xff
+                                   1594 ;	tempAndHumidity.c:227: AUXR |= 0x10;		
+      000486 43 8E 10         [24] 1595 	orl	_AUXR,#0x10
+                                   1596 ;	tempAndHumidity.c:230: }
+      000489 22               [24] 1597 	ret
+                                   1598 ;------------------------------------------------------------
+                                   1599 ;Allocation info for local variables in function 'reopenUART'
+                                   1600 ;------------------------------------------------------------
+                                   1601 ;	tempAndHumidity.c:232: void reopenUART(void)
+                                   1602 ;	-----------------------------------------
+                                   1603 ;	 function reopenUART
+                                   1604 ;	-----------------------------------------
+      00048A                       1605 _reopenUART:
+                                   1606 ;	tempAndHumidity.c:234: SCON = 0x00;
+      00048A 75 98 00         [24] 1607 	mov	_SCON,#0x00
+                                   1608 ;	tempAndHumidity.c:235: Uart1_Init();
+                                   1609 ;	tempAndHumidity.c:236: return;
+                                   1610 ;	tempAndHumidity.c:237: }
+      00048D 02r04r77         [24] 1611 	ljmp	_Uart1_Init
+                                   1612 ;------------------------------------------------------------
+                                   1613 ;Allocation info for local variables in function 'sendDataToServer'
+                                   1614 ;------------------------------------------------------------
+                                   1615 ;humidity                  Allocated with name '_sendDataToServer_PARM_2'
+                                   1616 ;temp                      Allocated to registers r4 r5 r6 r7 
+                                   1617 ;bodyLength                Allocated to registers r6 r7 
+                                   1618 ;body                      Allocated with name '_sendDataToServer_body_10001_99'
+                                   1619 ;tempStr                   Allocated with name '_sendDataToServer_tempStr_10002_100'
+                                   1620 ;humiStr                   Allocated with name '_sendDataToServer_humiStr_10003_101'
+                                   1621 ;bodyLengthStr             Allocated with name '_sendDataToServer_bodyLengthStr_10005_103'
+                                   1622 ;------------------------------------------------------------
+                                   1623 ;	tempAndHumidity.c:239: void sendDataToServer(float temp, float humidity)
+                                   1624 ;	-----------------------------------------
+                                   1625 ;	 function sendDataToServer
+                                   1626 ;	-----------------------------------------
+      000490                       1627 _sendDataToServer:
+      000490 AC 82            [24] 1628 	mov	r4,dpl
+      000492 AD 83            [24] 1629 	mov	r5,dph
+      000494 AE F0            [24] 1630 	mov	r6,b
+      000496 FF               [12] 1631 	mov	r7,a
+                                   1632 ;	tempAndHumidity.c:241: ESP01S_RST = 0;
+                                   1633 ;	assignBit
+      000497 C2 A5            [12] 1634 	clr	_P25
+                                   1635 ;	tempAndHumidity.c:242: delay_ms(200);
+      000499 90 00 C8         [24] 1636 	mov	dptr,#0x00c8
+      00049C C0 07            [24] 1637 	push	ar7
+      00049E C0 06            [24] 1638 	push	ar6
+      0004A0 C0 05            [24] 1639 	push	ar5
+      0004A2 C0 04            [24] 1640 	push	ar4
+      0004A4 12r02rE9         [24] 1641 	lcall	_delay_ms
+                                   1642 ;	tempAndHumidity.c:243: ESP01S_RST = 1;
+                                   1643 ;	assignBit
+      0004A7 D2 A5            [12] 1644 	setb	_P25
+                                   1645 ;	tempAndHumidity.c:244: delay_ms(500);
+      0004A9 90 01 F4         [24] 1646 	mov	dptr,#0x01f4
+      0004AC 12r02rE9         [24] 1647 	lcall	_delay_ms
+                                   1648 ;	tempAndHumidity.c:246: Uart1_Init();
+      0004AF 12r04r77         [24] 1649 	lcall	_Uart1_Init
+                                   1650 ;	tempAndHumidity.c:248: UART_SendString("AT+CWMODE=1\r\n");   
+      0004B2 90r00r00         [24] 1651 	mov	dptr,#___str_0
+      0004B5 75 F0 80         [24] 1652 	mov	b, #0x80
+      0004B8 12r04r4C         [24] 1653 	lcall	_UART_SendString
+                                   1654 ;	tempAndHumidity.c:250: reopenUART();
+      0004BB 12r04r8A         [24] 1655 	lcall	_reopenUART
+                                   1656 ;	tempAndHumidity.c:251: delay_ms(400);
+      0004BE 90 01 90         [24] 1657 	mov	dptr,#0x0190
+      0004C1 12r02rE9         [24] 1658 	lcall	_delay_ms
+                                   1659 ;	tempAndHumidity.c:252: UART_SendString("AT+CWJAP=\"HUAWEI-10HOL3\",\"88588681\"\r\n");  
+      0004C4 90r00r0E         [24] 1660 	mov	dptr,#___str_1
+      0004C7 75 F0 80         [24] 1661 	mov	b, #0x80
+      0004CA 12r04r4C         [24] 1662 	lcall	_UART_SendString
+                                   1663 ;	tempAndHumidity.c:255: reopenUART();
+      0004CD 12r04r8A         [24] 1664 	lcall	_reopenUART
+                                   1665 ;	tempAndHumidity.c:256: delay_ms(6000);
+      0004D0 90 17 70         [24] 1666 	mov	dptr,#0x1770
+      0004D3 12r02rE9         [24] 1667 	lcall	_delay_ms
+                                   1668 ;	tempAndHumidity.c:257: UART_SendString("AT+CIPSTART=\"TCP\",\"www.homemoni.xyz\",80\r\n"); //Change the server address at any time
+      0004D6 90r00r34         [24] 1669 	mov	dptr,#___str_2
+      0004D9 75 F0 80         [24] 1670 	mov	b, #0x80
+      0004DC 12r04r4C         [24] 1671 	lcall	_UART_SendString
+                                   1672 ;	tempAndHumidity.c:259: reopenUART();
+      0004DF 12r04r8A         [24] 1673 	lcall	_reopenUART
+                                   1674 ;	tempAndHumidity.c:260: delay_ms(2000);
+      0004E2 90 07 D0         [24] 1675 	mov	dptr,#0x07d0
+      0004E5 12r02rE9         [24] 1676 	lcall	_delay_ms
+                                   1677 ;	tempAndHumidity.c:265: memset(body,0,200);
+      0004E8 75*00 00         [24] 1678 	mov	_memset_PARM_2,#0x00
+      0004EB 75*00 C8         [24] 1679 	mov	_memset_PARM_3,#0xc8
+      0004EE 75*01 00         [24] 1680 	mov	(_memset_PARM_3 + 1),#0x00
+      0004F1 90r00r02         [24] 1681 	mov	dptr,#_sendDataToServer_body_10001_99
+      0004F4 75 F0 00         [24] 1682 	mov	b, #0x00
+      0004F7 12r00r00         [24] 1683 	lcall	_memset
+                                   1684 ;	tempAndHumidity.c:266: strcat(body,"POST /api/tempAndHumi HTTP/1.1\r\nHost: www.homemoni.xyz\r\nContent-Type: application/json\r\nContent-Length: 80\r\n\r\n{\"temperature\":");
+      0004FA 75*00r5E         [24] 1685 	mov	_strcat_PARM_2,#___str_3
+      0004FD 75*01s00         [24] 1686 	mov	(_strcat_PARM_2 + 1),#(___str_3 >> 8)
+      000500 75*02 80         [24] 1687 	mov	(_strcat_PARM_2 + 2),#0x80
+      000503 90r00r02         [24] 1688 	mov	dptr,#_sendDataToServer_body_10001_99
+      000506 75 F0 00         [24] 1689 	mov	b, #0x00
+      000509 12r00r00         [24] 1690 	lcall	_strcat
+      00050C D0 04            [24] 1691 	pop	ar4
+      00050E D0 05            [24] 1692 	pop	ar5
+      000510 D0 06            [24] 1693 	pop	ar6
+      000512 D0 07            [24] 1694 	pop	ar7
+                                   1695 ;	tempAndHumidity.c:269: floatToStr(temp,tempStr);
+      000514 90r00r00         [24] 1696 	mov	dptr,#_floatToStr_PARM_2
+      000517 74rCA            [12] 1697 	mov	a,#_sendDataToServer_tempStr_10002_100
+      000519 F0               [24] 1698 	movx	@dptr,a
+      00051A 74s00            [12] 1699 	mov	a,#(_sendDataToServer_tempStr_10002_100 >> 8)
+      00051C A3               [24] 1700 	inc	dptr
+      00051D F0               [24] 1701 	movx	@dptr,a
+      00051E 8C 82            [24] 1702 	mov	dpl, r4
+      000520 8D 83            [24] 1703 	mov	dph, r5
+      000522 8E F0            [24] 1704 	mov	b, r6
+      000524 EF               [12] 1705 	mov	a, r7
+      000525 12r00r00         [24] 1706 	lcall	_floatToStr
+                                   1707 ;	tempAndHumidity.c:270: strcat(body,tempStr);
+      000528 75*00rCA         [24] 1708 	mov	_strcat_PARM_2,#_sendDataToServer_tempStr_10002_100
+      00052B 75*01s00         [24] 1709 	mov	(_strcat_PARM_2 + 1),#(_sendDataToServer_tempStr_10002_100 >> 8)
+      00052E 75*02 00         [24] 1710 	mov	(_strcat_PARM_2 + 2),#0x00
+      000531 90r00r02         [24] 1711 	mov	dptr,#_sendDataToServer_body_10001_99
+      000534 75 F0 00         [24] 1712 	mov	b, #0x00
+      000537 12r00r00         [24] 1713 	lcall	_strcat
+                                   1714 ;	tempAndHumidity.c:272: strcat(body,",\"humidity\":");
+      00053A 75*00rDC         [24] 1715 	mov	_strcat_PARM_2,#___str_4
+      00053D 75*01s00         [24] 1716 	mov	(_strcat_PARM_2 + 1),#(___str_4 >> 8)
+      000540 75*02 80         [24] 1717 	mov	(_strcat_PARM_2 + 2),#0x80
+      000543 90r00r02         [24] 1718 	mov	dptr,#_sendDataToServer_body_10001_99
+      000546 75 F0 00         [24] 1719 	mov	b, #0x00
+      000549 12r00r00         [24] 1720 	lcall	_strcat
+                                   1721 ;	tempAndHumidity.c:275: floatToStr(humidity,humiStr);
+      00054C 90r00r00         [24] 1722 	mov	dptr,#_floatToStr_PARM_2
+      00054F 74rD0            [12] 1723 	mov	a,#_sendDataToServer_humiStr_10003_101
+      000551 F0               [24] 1724 	movx	@dptr,a
+      000552 74s00            [12] 1725 	mov	a,#(_sendDataToServer_humiStr_10003_101 >> 8)
+      000554 A3               [24] 1726 	inc	dptr
+      000555 F0               [24] 1727 	movx	@dptr,a
+      000556 85*31 82         [24] 1728 	mov	dpl, _sendDataToServer_PARM_2
+      000559 85*32 83         [24] 1729 	mov	dph, (_sendDataToServer_PARM_2 + 1)
+      00055C 85*33 F0         [24] 1730 	mov	b, (_sendDataToServer_PARM_2 + 2)
+      00055F E5*34            [12] 1731 	mov	a, (_sendDataToServer_PARM_2 + 3)
+      000561 12r00r00         [24] 1732 	lcall	_floatToStr
+                                   1733 ;	tempAndHumidity.c:276: strcat(body,humiStr);
+      000564 75*00rD0         [24] 1734 	mov	_strcat_PARM_2,#_sendDataToServer_humiStr_10003_101
+      000567 75*01s00         [24] 1735 	mov	(_strcat_PARM_2 + 1),#(_sendDataToServer_humiStr_10003_101 >> 8)
+      00056A 75*02 00         [24] 1736 	mov	(_strcat_PARM_2 + 2),#0x00
+      00056D 90r00r02         [24] 1737 	mov	dptr,#_sendDataToServer_body_10001_99
+      000570 75 F0 00         [24] 1738 	mov	b, #0x00
+      000573 12r00r00         [24] 1739 	lcall	_strcat
+                                   1740 ;	tempAndHumidity.c:278: strcat(body,",\"siteName\":\"Living Room\"}\r\n");
+      000576 75*00rE9         [24] 1741 	mov	_strcat_PARM_2,#___str_5
+      000579 75*01s00         [24] 1742 	mov	(_strcat_PARM_2 + 1),#(___str_5 >> 8)
+      00057C 75*02 80         [24] 1743 	mov	(_strcat_PARM_2 + 2),#0x80
+      00057F 90r00r02         [24] 1744 	mov	dptr,#_sendDataToServer_body_10001_99
+      000582 75 F0 00         [24] 1745 	mov	b, #0x00
+      000585 12r00r00         [24] 1746 	lcall	_strcat
+                                   1747 ;	tempAndHumidity.c:280: unsigned int bodyLength = strlen(body);
+      000588 90r00r02         [24] 1748 	mov	dptr,#_sendDataToServer_body_10001_99
+      00058B 75 F0 00         [24] 1749 	mov	b, #0x00
+      00058E 12r00r00         [24] 1750 	lcall	_strlen
+      000591 AE 82            [24] 1751 	mov	r6, dpl
+      000593 AF 83            [24] 1752 	mov	r7, dph
+                                   1753 ;	tempAndHumidity.c:282: reopenUART();
+      000595 C0 07            [24] 1754 	push	ar7
+      000597 C0 06            [24] 1755 	push	ar6
+      000599 12r04r8A         [24] 1756 	lcall	_reopenUART
+                                   1757 ;	tempAndHumidity.c:283: UART_SendString("AT+CIPSEND=");
+      00059C 90r01r06         [24] 1758 	mov	dptr,#___str_6
+      00059F 75 F0 80         [24] 1759 	mov	b, #0x80
+      0005A2 12r04r4C         [24] 1760 	lcall	_UART_SendString
+      0005A5 D0 06            [24] 1761 	pop	ar6
+      0005A7 D0 07            [24] 1762 	pop	ar7
+                                   1763 ;	tempAndHumidity.c:285: intToStr(bodyLength,bodyLengthStr);
+      0005A9 75*25rD6         [24] 1764 	mov	_intToStr_PARM_2,#_sendDataToServer_bodyLengthStr_10005_103
+      0005AC 75*26s00         [24] 1765 	mov	(_intToStr_PARM_2 + 1),#(_sendDataToServer_bodyLengthStr_10005_103 >> 8)
+      0005AF 75*27 00         [24] 1766 	mov	(_intToStr_PARM_2 + 2),#0x00
+      0005B2 8E 82            [24] 1767 	mov	dpl, r6
+      0005B4 8F 83            [24] 1768 	mov	dph, r7
+      0005B6 12r01rE9         [24] 1769 	lcall	_intToStr
+                                   1770 ;	tempAndHumidity.c:286: UART_SendString(bodyLengthStr);
+      0005B9 90r00rD6         [24] 1771 	mov	dptr,#_sendDataToServer_bodyLengthStr_10005_103
+      0005BC 75 F0 00         [24] 1772 	mov	b, #0x00
+      0005BF 12r04r4C         [24] 1773 	lcall	_UART_SendString
+                                   1774 ;	tempAndHumidity.c:287: UART_SendString("\r\n");
+      0005C2 90r01r12         [24] 1775 	mov	dptr,#___str_7
+      0005C5 75 F0 80         [24] 1776 	mov	b, #0x80
+      0005C8 12r04r4C         [24] 1777 	lcall	_UART_SendString
+                                   1778 ;	tempAndHumidity.c:288: delay_ms(1000);
+      0005CB 90 03 E8         [24] 1779 	mov	dptr,#0x03e8
+      0005CE 12r02rE9         [24] 1780 	lcall	_delay_ms
+                                   1781 ;	tempAndHumidity.c:290: reopenUART();
+      0005D1 12r04r8A         [24] 1782 	lcall	_reopenUART
+                                   1783 ;	tempAndHumidity.c:291: UART_SendString(body);
+      0005D4 90r00r02         [24] 1784 	mov	dptr,#_sendDataToServer_body_10001_99
+      0005D7 75 F0 00         [24] 1785 	mov	b, #0x00
+      0005DA 12r04r4C         [24] 1786 	lcall	_UART_SendString
+                                   1787 ;	tempAndHumidity.c:293: delay_ms(500);
+      0005DD 90 01 F4         [24] 1788 	mov	dptr,#0x01f4
+      0005E0 12r02rE9         [24] 1789 	lcall	_delay_ms
+                                   1790 ;	tempAndHumidity.c:296: reopenUART();
+      0005E3 12r04r8A         [24] 1791 	lcall	_reopenUART
+                                   1792 ;	tempAndHumidity.c:297: UART_SendString("AT+GSLP=720000\r\n");
+      0005E6 90r01r15         [24] 1793 	mov	dptr,#___str_8
+      0005E9 75 F0 80         [24] 1794 	mov	b, #0x80
+      0005EC 12r04r4C         [24] 1795 	lcall	_UART_SendString
+                                   1796 ;	tempAndHumidity.c:298: reopenUART();
+                                   1797 ;	tempAndHumidity.c:300: }
+      0005EF 02r04r8A         [24] 1798 	ljmp	_reopenUART
+                                   1799 ;------------------------------------------------------------
+                                   1800 ;Allocation info for local variables in function 'main'
+                                   1801 ;------------------------------------------------------------
+                                   1802 ;result                    Allocated to registers 
+                                   1803 ;raw_temp                  Allocated to registers r6 r7 
+                                   1804 ;raw_humidity              Allocated to registers r4 r5 
+                                   1805 ;tempSecondDigit           Allocated with name '_main_tempSecondDigit_30002_109'
+                                   1806 ;tempFirstDigit            Allocated with name '_main_tempFirstDigit_30002_109'
+                                   1807 ;tempPointFirstDigit       Allocated with name '_main_tempPointFirstDigit_30002_109'
+                                   1808 ;humidityThirdDigit        Allocated with name '_main_humidityThirdDigit_30002_109'
+                                   1809 ;humiditySecondDigit       Allocated with name '_main_humiditySecondDigit_30002_109'
+                                   1810 ;humidityFirstDigit        Allocated with name '_main_humidityFirstDigit_30002_109'
+                                   1811 ;humidityPointFirstDigit   Allocated with name '_main_humidityPointFirstDigit_30002_109'
+                                   1812 ;counter                   Allocated to registers r6 r7 
+                                   1813 ;true_temp                 Allocated with name '_main_true_temp_30002_109'
+                                   1814 ;true_humidity             Allocated to registers 
+                                   1815 ;------------------------------------------------------------
+                                   1816 ;	tempAndHumidity.c:304: void main(void) 
+                                   1817 ;	-----------------------------------------
+                                   1818 ;	 function main
+                                   1819 ;	-----------------------------------------
+      0005F2                       1820 _main:
+                                   1821 ;	tempAndHumidity.c:306: ESP01S_RST = 1;
+                                   1822 ;	assignBit
+      0005F2 D2 A5            [12] 1823 	setb	_P25
+                                   1824 ;	tempAndHumidity.c:307: delay_ms(500);
+      0005F4 90 01 F4         [24] 1825 	mov	dptr,#0x01f4
+      0005F7 12r02rE9         [24] 1826 	lcall	_delay_ms
+                                   1827 ;	tempAndHumidity.c:309: Uart1_Init();
+      0005FA 12r04r77         [24] 1828 	lcall	_Uart1_Init
+                                   1829 ;	tempAndHumidity.c:310: UART_SendString("AT+GSLP=720000\r\n");
+      0005FD 90r01r15         [24] 1830 	mov	dptr,#___str_8
+      000600 75 F0 80         [24] 1831 	mov	b, #0x80
+      000603 12r04r4C         [24] 1832 	lcall	_UART_SendString
+                                   1833 ;	tempAndHumidity.c:311: reopenUART();
+      000606 12r04r8A         [24] 1834 	lcall	_reopenUART
+                                   1835 ;	tempAndHumidity.c:313: BUTTON_PIN = 0;
+                                   1836 ;	assignBit
+      000609 C2 B2            [12] 1837 	clr	_P32
+                                   1838 ;	tempAndHumidity.c:315: IT0 = 0;   
+                                   1839 ;	assignBit
+      00060B C2 88            [12] 1840 	clr	_IT0
+                                   1841 ;	tempAndHumidity.c:316: EX0 = 1;  
+                                   1842 ;	assignBit
+      00060D D2 A8            [12] 1843 	setb	_EX0
+                                   1844 ;	tempAndHumidity.c:317: EA = 1;    
+                                   1845 ;	assignBit
+      00060F D2 AF            [12] 1846 	setb	_EA
+                                   1847 ;	tempAndHumidity.c:321: displayHumidity = false;
+      000611 75*10 00         [24] 1848 	mov	_displayHumidity,#0x00
+                                   1849 ;	tempAndHumidity.c:322: justPressed = false;
+      000614 75*11 00         [24] 1850 	mov	_justPressed,#0x00
+                                   1851 ;	tempAndHumidity.c:324: tempNegativeSign = false;
+      000617 75*14 00         [24] 1852 	mov	_tempNegativeSign,#0x00
+                                   1853 ;	tempAndHumidity.c:326: HUMIDITY_LED = 0;
+                                   1854 ;	assignBit
+      00061A C2 A7            [12] 1855 	clr	_P27
+                                   1856 ;	tempAndHumidity.c:328: while (1) {
+      00061C                       1857 00122$:
+                                   1858 ;	tempAndHumidity.c:330: DHT22_init();
+      00061C 12r03rAF         [24] 1859 	lcall	_DHT22_init
+                                   1860 ;	tempAndHumidity.c:331: result = DHT22_read();
+      00061F 12r03rB2         [24] 1861 	lcall	_DHT22_read
+                                   1862 ;	tempAndHumidity.c:334: unsigned int raw_temp = (data[2] & 0x7F) << 8 | data[3];
+      000622 AE*0D            [24] 1863 	mov	r6,(_data + 0x0002)
+      000624 53 06 7F         [24] 1864 	anl	ar6,#0x7f
+      000627 8E 07            [24] 1865 	mov	ar7,r6
+      000629 7E 00            [12] 1866 	mov	r6,#0x00
+      00062B AC*0E            [24] 1867 	mov	r4,(_data + 0x0003)
+      00062D 7D 00            [12] 1868 	mov	r5,#0x00
+      00062F EC               [12] 1869 	mov	a,r4
+      000630 42 06            [12] 1870 	orl	ar6,a
+      000632 ED               [12] 1871 	mov	a,r5
+      000633 42 07            [12] 1872 	orl	ar7,a
+                                   1873 ;	tempAndHumidity.c:335: unsigned int raw_humidity = (data[0] & 0x7F) << 8 | data[1];
+      000635 AC*0B            [24] 1874 	mov	r4,_data
+      000637 53 04 7F         [24] 1875 	anl	ar4,#0x7f
+      00063A 8C 05            [24] 1876 	mov	ar5,r4
+      00063C 7C 00            [12] 1877 	mov	r4,#0x00
+      00063E AA*0C            [24] 1878 	mov	r2,(_data + 0x0001)
+      000640 7B 00            [12] 1879 	mov	r3,#0x00
+      000642 EA               [12] 1880 	mov	a,r2
+      000643 42 04            [12] 1881 	orl	ar4,a
+      000645 EB               [12] 1882 	mov	a,r3
+      000646 42 05            [12] 1883 	orl	ar5,a
+                                   1884 ;	tempAndHumidity.c:337: tempNegativeSign = data[2] & 0x80;
+      000648 E5*0D            [12] 1885 	mov	a,(_data + 0x0002)
+      00064A 23               [12] 1886 	rl	a
+      00064B 54 01            [12] 1887 	anl	a,#0x01
+      00064D F5*14            [12] 1888 	mov	_tempNegativeSign,a
+                                   1889 ;	tempAndHumidity.c:339: unsigned char tempSecondDigit = raw_temp / 100;
+      00064F 75*00 64         [24] 1890 	mov	__divuint_PARM_2,#0x64
+      000652 75*01 00         [24] 1891 	mov	(__divuint_PARM_2 + 1),#0x00
+      000655 8E 82            [24] 1892 	mov	dpl, r6
+      000657 8F 83            [24] 1893 	mov	dph, r7
+      000659 C0 07            [24] 1894 	push	ar7
+      00065B C0 06            [24] 1895 	push	ar6
+      00065D C0 05            [24] 1896 	push	ar5
+      00065F C0 04            [24] 1897 	push	ar4
+      000661 12r00r00         [24] 1898 	lcall	__divuint
+      000664 AA 82            [24] 1899 	mov	r2, dpl
+      000666 D0 04            [24] 1900 	pop	ar4
+      000668 D0 05            [24] 1901 	pop	ar5
+      00066A D0 06            [24] 1902 	pop	ar6
+      00066C D0 07            [24] 1903 	pop	ar7
+      00066E 8A*35            [24] 1904 	mov	_main_tempSecondDigit_30002_109,r2
+                                   1905 ;	tempAndHumidity.c:340: unsigned char tempFirstDigit = (raw_temp / 10) % 10;
+      000670 75*00 0A         [24] 1906 	mov	__divuint_PARM_2,#0x0a
+      000673 75*01 00         [24] 1907 	mov	(__divuint_PARM_2 + 1),#0x00
+      000676 8E 82            [24] 1908 	mov	dpl, r6
+      000678 8F 83            [24] 1909 	mov	dph, r7
+      00067A C0 07            [24] 1910 	push	ar7
+      00067C C0 06            [24] 1911 	push	ar6
+      00067E C0 05            [24] 1912 	push	ar5
+      000680 C0 04            [24] 1913 	push	ar4
+      000682 12r00r00         [24] 1914 	lcall	__divuint
+      000685 75*00 0A         [24] 1915 	mov	__moduint_PARM_2,#0x0a
+      000688 75*01 00         [24] 1916 	mov	(__moduint_PARM_2 + 1),#0x00
+      00068B 12r00r00         [24] 1917 	lcall	__moduint
+      00068E AA 82            [24] 1918 	mov	r2, dpl
+      000690 D0 04            [24] 1919 	pop	ar4
+      000692 D0 05            [24] 1920 	pop	ar5
+      000694 D0 06            [24] 1921 	pop	ar6
+      000696 D0 07            [24] 1922 	pop	ar7
+      000698 8A*36            [24] 1923 	mov	_main_tempFirstDigit_30002_109,r2
+                                   1924 ;	tempAndHumidity.c:341: unsigned char tempPointFirstDigit = raw_temp % 10;
+      00069A 75*00 0A         [24] 1925 	mov	__moduint_PARM_2,#0x0a
+      00069D 75*01 00         [24] 1926 	mov	(__moduint_PARM_2 + 1),#0x00
+      0006A0 8E 82            [24] 1927 	mov	dpl, r6
+      0006A2 8F 83            [24] 1928 	mov	dph, r7
+      0006A4 C0 07            [24] 1929 	push	ar7
+      0006A6 C0 06            [24] 1930 	push	ar6
+      0006A8 C0 05            [24] 1931 	push	ar5
+      0006AA C0 04            [24] 1932 	push	ar4
+      0006AC 12r00r00         [24] 1933 	lcall	__moduint
+      0006AF AA 82            [24] 1934 	mov	r2, dpl
+      0006B1 D0 04            [24] 1935 	pop	ar4
+      0006B3 D0 05            [24] 1936 	pop	ar5
+      0006B5 8A*37            [24] 1937 	mov	_main_tempPointFirstDigit_30002_109,r2
+                                   1938 ;	tempAndHumidity.c:343: unsigned char humidityThirdDigit = raw_humidity / 1000;
+      0006B7 75*00 E8         [24] 1939 	mov	__divuint_PARM_2,#0xe8
+      0006BA 75*01 03         [24] 1940 	mov	(__divuint_PARM_2 + 1),#0x03
+      0006BD 8C 82            [24] 1941 	mov	dpl, r4
+      0006BF 8D 83            [24] 1942 	mov	dph, r5
+      0006C1 C0 05            [24] 1943 	push	ar5
+      0006C3 C0 04            [24] 1944 	push	ar4
+      0006C5 12r00r00         [24] 1945 	lcall	__divuint
+      0006C8 AA 82            [24] 1946 	mov	r2, dpl
+      0006CA D0 04            [24] 1947 	pop	ar4
+      0006CC D0 05            [24] 1948 	pop	ar5
+      0006CE 8A*38            [24] 1949 	mov	_main_humidityThirdDigit_30002_109,r2
+                                   1950 ;	tempAndHumidity.c:344: unsigned char humiditySecondDigit = raw_humidity / 100 % 10;
+      0006D0 75*00 64         [24] 1951 	mov	__divuint_PARM_2,#0x64
+      0006D3 75*01 00         [24] 1952 	mov	(__divuint_PARM_2 + 1),#0x00
+      0006D6 8C 82            [24] 1953 	mov	dpl, r4
+      0006D8 8D 83            [24] 1954 	mov	dph, r5
+      0006DA C0 05            [24] 1955 	push	ar5
+      0006DC C0 04            [24] 1956 	push	ar4
+      0006DE 12r00r00         [24] 1957 	lcall	__divuint
+      0006E1 75*00 0A         [24] 1958 	mov	__moduint_PARM_2,#0x0a
+      0006E4 75*01 00         [24] 1959 	mov	(__moduint_PARM_2 + 1),#0x00
+      0006E7 12r00r00         [24] 1960 	lcall	__moduint
+      0006EA AA 82            [24] 1961 	mov	r2, dpl
+      0006EC D0 04            [24] 1962 	pop	ar4
+      0006EE D0 05            [24] 1963 	pop	ar5
+      0006F0 8A*39            [24] 1964 	mov	_main_humiditySecondDigit_30002_109,r2
+                                   1965 ;	tempAndHumidity.c:345: unsigned char humidityFirstDigit = (raw_humidity / 10) % 10;
+      0006F2 75*00 0A         [24] 1966 	mov	__divuint_PARM_2,#0x0a
+      0006F5 75*01 00         [24] 1967 	mov	(__divuint_PARM_2 + 1),#0x00
+      0006F8 8C 82            [24] 1968 	mov	dpl, r4
+      0006FA 8D 83            [24] 1969 	mov	dph, r5
+      0006FC C0 05            [24] 1970 	push	ar5
+      0006FE C0 04            [24] 1971 	push	ar4
+      000700 12r00r00         [24] 1972 	lcall	__divuint
+      000703 75*00 0A         [24] 1973 	mov	__moduint_PARM_2,#0x0a
+      000706 75*01 00         [24] 1974 	mov	(__moduint_PARM_2 + 1),#0x00
+      000709 12r00r00         [24] 1975 	lcall	__moduint
+      00070C AA 82            [24] 1976 	mov	r2, dpl
+      00070E D0 04            [24] 1977 	pop	ar4
+      000710 D0 05            [24] 1978 	pop	ar5
+      000712 8A*3A            [24] 1979 	mov	_main_humidityFirstDigit_30002_109,r2
+                                   1980 ;	tempAndHumidity.c:346: unsigned char humidityPointFirstDigit = raw_humidity % 10;
+      000714 75*00 0A         [24] 1981 	mov	__moduint_PARM_2,#0x0a
+      000717 75*01 00         [24] 1982 	mov	(__moduint_PARM_2 + 1),#0x00
+      00071A 8C 82            [24] 1983 	mov	dpl, r4
+      00071C 8D 83            [24] 1984 	mov	dph, r5
+      00071E C0 05            [24] 1985 	push	ar5
+      000720 C0 04            [24] 1986 	push	ar4
+      000722 12r00r00         [24] 1987 	lcall	__moduint
+      000725 AA 82            [24] 1988 	mov	r2, dpl
+      000727 D0 04            [24] 1989 	pop	ar4
+      000729 D0 05            [24] 1990 	pop	ar5
+      00072B D0 06            [24] 1991 	pop	ar6
+      00072D D0 07            [24] 1992 	pop	ar7
+      00072F 8A*3B            [24] 1993 	mov	_main_humidityPointFirstDigit_30002_109,r2
+                                   1994 ;	tempAndHumidity.c:351: float true_temp = raw_temp / 10.0;
+      000731 8E 82            [24] 1995 	mov	dpl, r6
+      000733 8F 83            [24] 1996 	mov	dph, r7
+      000735 C0 05            [24] 1997 	push	ar5
+      000737 C0 04            [24] 1998 	push	ar4
+      000739 12r00r00         [24] 1999 	lcall	___uint2fs
+      00073C AA 82            [24] 2000 	mov	r2, dpl
+      00073E AB 83            [24] 2001 	mov	r3, dph
+      000740 AE F0            [24] 2002 	mov	r6, b
+      000742 FF               [12] 2003 	mov	r7, a
+      000743 E4               [12] 2004 	clr	a
+      000744 C0 E0            [24] 2005 	push	acc
+      000746 C0 E0            [24] 2006 	push	acc
+      000748 74 20            [12] 2007 	mov	a,#0x20
+      00074A C0 E0            [24] 2008 	push	acc
+      00074C 74 41            [12] 2009 	mov	a,#0x41
+      00074E C0 E0            [24] 2010 	push	acc
+                                   2011 ;	tempAndHumidity.c:352: float true_humidity = raw_humidity / 10.0;
+      000750 8A 82            [24] 2012 	mov	dpl, r2
+      000752 8B 83            [24] 2013 	mov	dph, r3
+      000754 8E F0            [24] 2014 	mov	b, r6
+      000756 EF               [12] 2015 	mov	a, r7
+      000757 12r00r00         [24] 2016 	lcall	___fsdiv
+      00075A 85 82*3C         [24] 2017 	mov	_main_true_temp_30002_109,dpl
+      00075D 85 83*3D         [24] 2018 	mov	(_main_true_temp_30002_109 + 1),dph
+      000760 85 F0*3E         [24] 2019 	mov	(_main_true_temp_30002_109 + 2),b
+      000763 F5*3F            [12] 2020 	mov	(_main_true_temp_30002_109 + 3),a
+      000765 E5 81            [12] 2021 	mov	a,sp
+      000767 24 FC            [12] 2022 	add	a,#0xfc
+      000769 F5 81            [12] 2023 	mov	sp,a
+      00076B D0 04            [24] 2024 	pop	ar4
+      00076D D0 05            [24] 2025 	pop	ar5
+      00076F 8C 82            [24] 2026 	mov	dpl, r4
+      000771 8D 83            [24] 2027 	mov	dph, r5
+      000773 12r00r00         [24] 2028 	lcall	___uint2fs
+      000776 AC 82            [24] 2029 	mov	r4, dpl
+      000778 AD 83            [24] 2030 	mov	r5, dph
+      00077A AE F0            [24] 2031 	mov	r6, b
+      00077C FF               [12] 2032 	mov	r7, a
+      00077D E4               [12] 2033 	clr	a
+      00077E C0 E0            [24] 2034 	push	acc
+      000780 C0 E0            [24] 2035 	push	acc
+      000782 74 20            [12] 2036 	mov	a,#0x20
+      000784 C0 E0            [24] 2037 	push	acc
+      000786 74 41            [12] 2038 	mov	a,#0x41
+      000788 C0 E0            [24] 2039 	push	acc
+                                   2040 ;	tempAndHumidity.c:353: sendDataToServer(true_temp,true_humidity);
+      00078A 8C 82            [24] 2041 	mov	dpl, r4
+      00078C 8D 83            [24] 2042 	mov	dph, r5
+      00078E 8E F0            [24] 2043 	mov	b, r6
+      000790 EF               [12] 2044 	mov	a, r7
+      000791 12r00r00         [24] 2045 	lcall	___fsdiv
+      000794 85 82*31         [24] 2046 	mov	_sendDataToServer_PARM_2,dpl
+      000797 85 83*32         [24] 2047 	mov	(_sendDataToServer_PARM_2 + 1),dph
+      00079A 85 F0*33         [24] 2048 	mov	(_sendDataToServer_PARM_2 + 2),b
+      00079D F5*34            [12] 2049 	mov	(_sendDataToServer_PARM_2 + 3),a
+      00079F E5 81            [12] 2050 	mov	a,sp
+      0007A1 24 FC            [12] 2051 	add	a,#0xfc
+      0007A3 F5 81            [12] 2052 	mov	sp,a
+      0007A5 85*3C 82         [24] 2053 	mov	dpl, _main_true_temp_30002_109
+      0007A8 85*3D 83         [24] 2054 	mov	dph, (_main_true_temp_30002_109 + 1)
+      0007AB 85*3E F0         [24] 2055 	mov	b, (_main_true_temp_30002_109 + 2)
+      0007AE E5*3F            [12] 2056 	mov	a, (_main_true_temp_30002_109 + 3)
+      0007B0 12r04r90         [24] 2057 	lcall	_sendDataToServer
+                                   2058 ;	tempAndHumidity.c:356: while(counter--)
+      0007B3 7E B8            [12] 2059 	mov	r6,#0xb8
+      0007B5 7F 0B            [12] 2060 	mov	r7,#0x0b
+      0007B7                       2061 00114$:
+      0007B7 8E 04            [24] 2062 	mov	ar4,r6
+      0007B9 8F 05            [24] 2063 	mov	ar5,r7
+      0007BB 1E               [12] 2064 	dec	r6
+      0007BC BE FF 01         [24] 2065 	cjne	r6,#0xff,00187$
+      0007BF 1F               [12] 2066 	dec	r7
+      0007C0                       2067 00187$:
+      0007C0 EC               [12] 2068 	mov	a,r4
+      0007C1 4D               [12] 2069 	orl	a,r5
+      0007C2 70 03            [24] 2070 	jnz	00188$
+      0007C4 02r08r7E         [24] 2071 	ljmp	00116$
+      0007C7                       2072 00188$:
+                                   2073 ;	tempAndHumidity.c:358: if(comfimed!=0)
+      0007C7 E5*12            [12] 2074 	mov	a,_comfimed
+      0007C9 45*13            [12] 2075 	orl	a,(_comfimed + 1)
+      0007CB 60 09            [24] 2076 	jz	00102$
+                                   2077 ;	tempAndHumidity.c:360: comfimed--;
+      0007CD 15*12            [12] 2078 	dec	_comfimed
+      0007CF 74 FF            [12] 2079 	mov	a,#0xff
+      0007D1 B5*12 02         [24] 2080 	cjne	a,_comfimed,00190$
+      0007D4 15*13            [12] 2081 	dec	(_comfimed + 1)
+      0007D6                       2082 00190$:
+      0007D6                       2083 00102$:
+                                   2084 ;	tempAndHumidity.c:363: if(justPressed)
+      0007D6 E5*11            [12] 2085 	mov	a,_justPressed
+      0007D8 60 03            [24] 2086 	jz	00191$
+      0007DA 02r08r7E         [24] 2087 	ljmp	00116$
+      0007DD                       2088 00191$:
+                                   2089 ;	tempAndHumidity.c:368: if(displayHumidity)
+      0007DD E5*10            [12] 2090 	mov	a,_displayHumidity
+      0007DF 60 4C            [24] 2091 	jz	00112$
+                                   2092 ;	tempAndHumidity.c:370: HUMIDITY_LED = 1;
+                                   2093 ;	assignBit
+      0007E1 D2 A7            [12] 2094 	setb	_P27
+                                   2095 ;	tempAndHumidity.c:371: if(humidityThirdDigit!=0)
+      0007E3 E5*38            [12] 2096 	mov	a,_main_humidityThirdDigit_30002_109
+      0007E5 60 11            [24] 2097 	jz	00106$
+                                   2098 ;	tempAndHumidity.c:373: display_number(humidityThirdDigit,1);
+      0007E7 75*30 01         [24] 2099 	mov	_display_number_PARM_2,#0x01
+      0007EA 85*38 82         [24] 2100 	mov	dpl, _main_humidityThirdDigit_30002_109
+      0007ED C0 07            [24] 2101 	push	ar7
+      0007EF C0 06            [24] 2102 	push	ar6
+      0007F1 12r03r29         [24] 2103 	lcall	_display_number
+      0007F4 D0 06            [24] 2104 	pop	ar6
+      0007F6 D0 07            [24] 2105 	pop	ar7
+      0007F8                       2106 00106$:
+                                   2107 ;	tempAndHumidity.c:375: display_number(humiditySecondDigit,2);
+      0007F8 75*30 02         [24] 2108 	mov	_display_number_PARM_2,#0x02
+      0007FB 85*39 82         [24] 2109 	mov	dpl, _main_humiditySecondDigit_30002_109
+      0007FE C0 07            [24] 2110 	push	ar7
+      000800 C0 06            [24] 2111 	push	ar6
+      000802 12r03r29         [24] 2112 	lcall	_display_number
+      000805 D0 06            [24] 2113 	pop	ar6
+      000807 D0 07            [24] 2114 	pop	ar7
+                                   2115 ;	tempAndHumidity.c:376: display_number(humidityFirstDigit,3);
+      000809 75*30 03         [24] 2116 	mov	_display_number_PARM_2,#0x03
+      00080C 85*3A 82         [24] 2117 	mov	dpl, _main_humidityFirstDigit_30002_109
+      00080F C0 07            [24] 2118 	push	ar7
+      000811 C0 06            [24] 2119 	push	ar6
+      000813 12r03r29         [24] 2120 	lcall	_display_number
+      000816 D0 06            [24] 2121 	pop	ar6
+      000818 D0 07            [24] 2122 	pop	ar7
+                                   2123 ;	tempAndHumidity.c:377: display_number(humidityPointFirstDigit,4);
+      00081A 75*30 04         [24] 2124 	mov	_display_number_PARM_2,#0x04
+      00081D 85*3B 82         [24] 2125 	mov	dpl, _main_humidityPointFirstDigit_30002_109
+      000820 C0 07            [24] 2126 	push	ar7
+      000822 C0 06            [24] 2127 	push	ar6
+      000824 12r03r29         [24] 2128 	lcall	_display_number
+      000827 D0 06            [24] 2129 	pop	ar6
+      000829 D0 07            [24] 2130 	pop	ar7
+      00082B 80 8A            [24] 2131 	sjmp	00114$
+      00082D                       2132 00112$:
+                                   2133 ;	tempAndHumidity.c:381: HUMIDITY_LED = 0;
+                                   2134 ;	assignBit
+      00082D C2 A7            [12] 2135 	clr	_P27
+                                   2136 ;	tempAndHumidity.c:382: if(tempNegativeSign)
+      00082F E5*14            [12] 2137 	mov	a,_tempNegativeSign
+      000831 60 11            [24] 2138 	jz	00108$
+                                   2139 ;	tempAndHumidity.c:384: display_number(10,1);
+      000833 75*30 01         [24] 2140 	mov	_display_number_PARM_2,#0x01
+      000836 75 82 0A         [24] 2141 	mov	dpl, #0x0a
+      000839 C0 07            [24] 2142 	push	ar7
+      00083B C0 06            [24] 2143 	push	ar6
+      00083D 12r03r29         [24] 2144 	lcall	_display_number
+      000840 D0 06            [24] 2145 	pop	ar6
+      000842 D0 07            [24] 2146 	pop	ar7
+      000844                       2147 00108$:
+                                   2148 ;	tempAndHumidity.c:386: if(tempSecondDigit!=0)
+      000844 E5*35            [12] 2149 	mov	a,_main_tempSecondDigit_30002_109
+      000846 60 11            [24] 2150 	jz	00110$
+                                   2151 ;	tempAndHumidity.c:388: display_number(tempSecondDigit,2);
+      000848 75*30 02         [24] 2152 	mov	_display_number_PARM_2,#0x02
+      00084B 85*35 82         [24] 2153 	mov	dpl, _main_tempSecondDigit_30002_109
+      00084E C0 07            [24] 2154 	push	ar7
+      000850 C0 06            [24] 2155 	push	ar6
+      000852 12r03r29         [24] 2156 	lcall	_display_number
+      000855 D0 06            [24] 2157 	pop	ar6
+      000857 D0 07            [24] 2158 	pop	ar7
+      000859                       2159 00110$:
+                                   2160 ;	tempAndHumidity.c:391: display_number(tempFirstDigit,3);
+      000859 75*30 03         [24] 2161 	mov	_display_number_PARM_2,#0x03
+      00085C 85*36 82         [24] 2162 	mov	dpl, _main_tempFirstDigit_30002_109
+      00085F C0 07            [24] 2163 	push	ar7
+      000861 C0 06            [24] 2164 	push	ar6
+      000863 12r03r29         [24] 2165 	lcall	_display_number
+      000866 D0 06            [24] 2166 	pop	ar6
+      000868 D0 07            [24] 2167 	pop	ar7
+                                   2168 ;	tempAndHumidity.c:392: display_number(tempPointFirstDigit,4);
+      00086A 75*30 04         [24] 2169 	mov	_display_number_PARM_2,#0x04
+      00086D 85*37 82         [24] 2170 	mov	dpl, _main_tempPointFirstDigit_30002_109
+      000870 C0 07            [24] 2171 	push	ar7
+      000872 C0 06            [24] 2172 	push	ar6
+      000874 12r03r29         [24] 2173 	lcall	_display_number
+      000877 D0 06            [24] 2174 	pop	ar6
+      000879 D0 07            [24] 2175 	pop	ar7
+      00087B 02r07rB7         [24] 2176 	ljmp	00114$
+      00087E                       2177 00116$:
+                                   2178 ;	tempAndHumidity.c:396: if(justPressed)
+      00087E E5*11            [12] 2179 	mov	a,_justPressed
+      000880 60 12            [24] 2180 	jz	00118$
+                                   2181 ;	tempAndHumidity.c:398: delay_ms(150);
+      000882 90 00 96         [24] 2182 	mov	dptr,#0x0096
+      000885 12r02rE9         [24] 2183 	lcall	_delay_ms
+                                   2184 ;	tempAndHumidity.c:399: displayHumidity = !displayHumidity;
+      000888 E5*10            [12] 2185 	mov	a,_displayHumidity
+      00088A B4 01 00         [24] 2186 	cjne	a,#0x01,00197$
+      00088D                       2187 00197$:
+      00088D E4               [12] 2188 	clr	a
+      00088E 33               [12] 2189 	rlc	a
+      00088F F5*10            [12] 2190 	mov	_displayHumidity,a
+                                   2191 ;	tempAndHumidity.c:400: justPressed = false;
+      000891 75*11 00         [24] 2192 	mov	_justPressed,#0x00
+      000894                       2193 00118$:
+                                   2194 ;	tempAndHumidity.c:402: delay_ms(1);
+      000894 90 00 01         [24] 2195 	mov	dptr,#0x0001
+      000897 12r02rE9         [24] 2196 	lcall	_delay_ms
+                                   2197 ;	tempAndHumidity.c:405: }
+      00089A 02r06r1C         [24] 2198 	ljmp	00122$
+                                   2199 	.area CSEG    (CODE)
+                                   2200 	.area CONST   (CODE)
+                                   2201 	.area CONST   (CODE)
+      000000                       2202 ___str_0:
+      000000 41 54 2B 43 57 4D 4F  2203 	.ascii "AT+CWMODE=1"
+             44 45 3D 31
+      00000B 0D                    2204 	.db 0x0d
+      00000C 0A                    2205 	.db 0x0a
+      00000D 00                    2206 	.db 0x00
+                                   2207 	.area CSEG    (CODE)
+                                   2208 	.area CONST   (CODE)
+      00000E                       2209 ___str_1:
+      00000E 41 54 2B 43 57 4A 41  2210 	.ascii "AT+CWJAP="
+             50 3D
+      000017 22                    2211 	.db 0x22
+      000018 48 55 41 57 45 49 2D  2212 	.ascii "HUAWEI-10HOL3"
+             31 30 48 4F 4C 33
+      000025 22                    2213 	.db 0x22
+      000026 2C                    2214 	.ascii ","
+      000027 22                    2215 	.db 0x22
+      000028 38 38 35 38 38 36 38  2216 	.ascii "88588681"
+             31
+      000030 22                    2217 	.db 0x22
+      000031 0D                    2218 	.db 0x0d
+      000032 0A                    2219 	.db 0x0a
+      000033 00                    2220 	.db 0x00
+                                   2221 	.area CSEG    (CODE)
+                                   2222 	.area CONST   (CODE)
+      000034                       2223 ___str_2:
+      000034 41 54 2B 43 49 50 53  2224 	.ascii "AT+CIPSTART="
+             54 41 52 54 3D
+      000040 22                    2225 	.db 0x22
+      000041 54 43 50              2226 	.ascii "TCP"
+      000044 22                    2227 	.db 0x22
+      000045 2C                    2228 	.ascii ","
+      000046 22                    2229 	.db 0x22
+      000047 77 77 77 2E 68 6F 6D  2230 	.ascii "www.homemoni.xyz"
+             65 6D 6F 6E 69 2E 78
+             79 7A
+      000057 22                    2231 	.db 0x22
+      000058 2C 38 30              2232 	.ascii ",80"
+      00005B 0D                    2233 	.db 0x0d
+      00005C 0A                    2234 	.db 0x0a
+      00005D 00                    2235 	.db 0x00
+                                   2236 	.area CSEG    (CODE)
+                                   2237 	.area CONST   (CODE)
+      00005E                       2238 ___str_3:
+      00005E 50 4F 53 54 20 2F 61  2239 	.ascii "POST /api/tempAndHumi HTTP/1.1"
+             70 69 2F 74 65 6D 70
+             41 6E 64 48 75 6D 69
+             20 48 54 54 50 2F 31
+             2E 31
+      00007C 0D                    2240 	.db 0x0d
+      00007D 0A                    2241 	.db 0x0a
+      00007E 48 6F 73 74 3A 20 77  2242 	.ascii "Host: www.homemoni.xyz"
+             77 77 2E 68 6F 6D 65
+             6D 6F 6E 69 2E 78 79
+             7A
+      000094 0D                    2243 	.db 0x0d
+      000095 0A                    2244 	.db 0x0a
+      000096 43 6F 6E 74 65 6E 74  2245 	.ascii "Content-Type: application/json"
+             2D 54 79 70 65 3A 20
+             61 70 70 6C 69 63 61
+             74 69 6F 6E 2F 6A 73
+             6F 6E
+      0000B4 0D                    2246 	.db 0x0d
+      0000B5 0A                    2247 	.db 0x0a
+      0000B6 43 6F 6E 74 65 6E 74  2248 	.ascii "Content-Length: 80"
+             2D 4C 65 6E 67 74 68
+             3A 20 38 30
+      0000C8 0D                    2249 	.db 0x0d
+      0000C9 0A                    2250 	.db 0x0a
+      0000CA 0D                    2251 	.db 0x0d
+      0000CB 0A                    2252 	.db 0x0a
+      0000CC 7B                    2253 	.ascii "{"
+      0000CD 22                    2254 	.db 0x22
+      0000CE 74 65 6D 70 65 72 61  2255 	.ascii "temperature"
+             74 75 72 65
+      0000D9 22                    2256 	.db 0x22
+      0000DA 3A                    2257 	.ascii ":"
+      0000DB 00                    2258 	.db 0x00
+                                   2259 	.area CSEG    (CODE)
+                                   2260 	.area CONST   (CODE)
+      0000DC                       2261 ___str_4:
+      0000DC 2C                    2262 	.ascii ","
+      0000DD 22                    2263 	.db 0x22
+      0000DE 68 75 6D 69 64 69 74  2264 	.ascii "humidity"
+             79
+      0000E6 22                    2265 	.db 0x22
+      0000E7 3A                    2266 	.ascii ":"
+      0000E8 00                    2267 	.db 0x00
+                                   2268 	.area CSEG    (CODE)
+                                   2269 	.area CONST   (CODE)
+      0000E9                       2270 ___str_5:
+      0000E9 2C                    2271 	.ascii ","
+      0000EA 22                    2272 	.db 0x22
+      0000EB 73 69 74 65 4E 61 6D  2273 	.ascii "siteName"
+             65
+      0000F3 22                    2274 	.db 0x22
+      0000F4 3A                    2275 	.ascii ":"
+      0000F5 22                    2276 	.db 0x22
+      0000F6 4C 69 76 69 6E 67 20  2277 	.ascii "Living Room"
+             52 6F 6F 6D
+      000101 22                    2278 	.db 0x22
+      000102 7D                    2279 	.ascii "}"
+      000103 0D                    2280 	.db 0x0d
+      000104 0A                    2281 	.db 0x0a
+      000105 00                    2282 	.db 0x00
+                                   2283 	.area CSEG    (CODE)
+                                   2284 	.area CONST   (CODE)
+      000106                       2285 ___str_6:
+      000106 41 54 2B 43 49 50 53  2286 	.ascii "AT+CIPSEND="
+             45 4E 44 3D
+      000111 00                    2287 	.db 0x00
+                                   2288 	.area CSEG    (CODE)
+                                   2289 	.area CONST   (CODE)
+      000112                       2290 ___str_7:
+      000112 0D                    2291 	.db 0x0d
+      000113 0A                    2292 	.db 0x0a
+      000114 00                    2293 	.db 0x00
+                                   2294 	.area CSEG    (CODE)
+                                   2295 	.area CONST   (CODE)
+      000115                       2296 ___str_8:
+      000115 41 54 2B 47 53 4C 50  2297 	.ascii "AT+GSLP=720000"
+             3D 37 32 30 30 30 30
+      000123 0D                    2298 	.db 0x0d
+      000124 0A                    2299 	.db 0x0a
+      000125 00                    2300 	.db 0x00
+                                   2301 	.area CSEG    (CODE)
+                                   2302 	.area XINIT   (CODE)
+                                   2303 	.area CABS    (ABS,CODE)

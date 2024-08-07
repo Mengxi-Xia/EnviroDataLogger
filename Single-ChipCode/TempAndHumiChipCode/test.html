@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>温度和湿度监测图表</title>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+</head>
+<body>
+    <div style="max-width: 800px; margin: auto;">
+        <canvas id="myChart"></canvas>
+    </div>
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('http://localhost:8080/api/tempAndHumi'); // 更改为你的API地址
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            } catch (error) {
+                console.error('Failed to fetch:', error);
+                return [];
+            }
+        }
+
+        async function organizeData() {
+            const rawData = await fetchData();
+            return rawData.reduce((acc, item) => {
+                acc.temperature.push({ x: item.timestamp, y: item.temperature });
+                acc.humidity.push({ x: item.timestamp, y: item.humidity });
+                return acc;
+            }, { temperature: [], humidity: [] });
+        }
+
+        async function drawChart() {
+            const { temperature, humidity } = await organizeData();
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: temperature.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                        borderColor: 'red',
+                        backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                        yAxisID: 'y-axis-1'
+                    }, {
+                        label: 'Humidity (%)',
+                        data: humidity.sort((a, b) => moment(a.x).diff(moment(b.x))),
+                        borderColor: 'blue',
+                        backgroundColor: 'rgba(0, 0, 255, 0.5)',
+                        yAxisID: 'y-axis-2'
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'YYYY-MM-DDTHH:mm:ss.SSSSSS',
+                                unit: 'minute',
+                                displayFormats: {
+                                    minute: 'HH:mm:ss'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Time'
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'x',  // 只在X轴方向上启用拖移
+                                threshold: 10, // 拖动门槛，单位是像素
+                            }
+
+                        },
+                        'y-axis-1': {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Temperature (°C)'
+                            }
+                        },
+                        'y-axis-2': {
+                            type: 'linear',
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                            title: {
+                                display: true,
+                                text: 'Humidity (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x',
+                                rangeMin: {
+                                    x: null
+                                },
+                                rangeMax: {
+                                    x: null
+                                }
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true,
+                                    speed: 0.1
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        drawChart();
+    </script>
+</body>
+</html>

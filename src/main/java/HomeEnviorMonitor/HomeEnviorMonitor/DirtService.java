@@ -19,6 +19,9 @@ public class DirtService {
 
     public DirtRecord save(DirtRecord record) {
         record.setTimestamp(LocalDateTime.now());
+        record.setMositure((1023-(record.getMositure()))/1023.0*100);
+        
+
         return repository.save(record);
     }
 

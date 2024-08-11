@@ -270,6 +270,7 @@
 
             showProgressBar();  // 显示进度条
 
+            
             fetchDataWithProgress(`http://homemoni.xyz/api/dirt?startTime=${encodeURIComponent(startTimeISO)}&endTime=${encodeURIComponent(endTimeISO)}`)
                 .then(newData => {
                     hideProgressBar();  // 隐藏进度条

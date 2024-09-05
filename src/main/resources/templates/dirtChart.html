@@ -229,8 +229,8 @@
         function fetchInitialData() {
             if(!autoRefresh) return;
 
-            const currentTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") + "+08:00";
-            const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") + "+08:00";
+            const currentTime = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") ;
+            const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toLocaleString("sv-SE", { timeZone: "Asia/Hong_Kong", hour12: false }).replace(" ", "T") ;
             console.log(currentTime);
             console.log(thirtyMinutesAgo);
 
